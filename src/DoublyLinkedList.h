@@ -489,4 +489,9 @@ class List {
     
     return *this;
   }
+  
+  List<T> clone() const {
+    List<T> list = *this;
+    return list;
+  }
 };

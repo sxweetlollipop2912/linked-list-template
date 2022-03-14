@@ -60,6 +60,10 @@ int main(int argc, const char* argv[]) {
   list.remove_at(0);
   // CRASH at list.front()
   // output(list);
+  
+  list.push_back(0).push_back(1);
+  auto l2 = list.clone().push_back(2);
+  std::cout << "L1 back: " << list.back() << "\nL2 back: " << l2.back() << "\n\n";
 
 
   List<std::string> ll{"acd", "cde", "acc"};
