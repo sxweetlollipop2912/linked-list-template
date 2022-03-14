@@ -1,4 +1,6 @@
+
 #include <iostream>
+#include <string>
 
 #include "DoublyLinkedList.h"
 
@@ -45,8 +47,8 @@ int main(int argc, const char* argv[]) {
   output(list);
 
   list.push_back(4);
+  std::cout << "----------------------";
   output(list);
-
   std::cout << "Is 5 an element: " << (list.find(5) != nullptr)
             << (list.find_last(5) != nullptr) << "\n\n";
   std::cout << "Is 5 an element: "
@@ -73,4 +75,21 @@ int main(int argc, const char* argv[]) {
   list.remove_at(0);
   // CRASH at list.front()
   // output(list);
+
+
+  List<std::string> ll{"acd", "cde", "acc"};
+  std::cout << (ll.find_if([](const std::string& s) -> bool {
+    return s[0] == 'b';
+  }) != nullptr)
+            << '\n';
+  std::cout << (ll.count_if([](const std::string& s) -> bool {
+    return s[0] == 'a';
+  })) << '\n';
+  List<int> ll2{2, 4, 6, 8, 10};
+  std::cout << ll2.all_of([](const int& value) { return value % 2 == 0; })
+            << '\n';
+  std::cout << ll2.any_of([](const int& value) { return value % 2 != 0; })
+            << '\n';
+  std::cout << ll2.none_of([](const int& value) { return value % 2 != 0; })
+            << '\n';
 }

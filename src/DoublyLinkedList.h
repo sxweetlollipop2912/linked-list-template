@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
@@ -287,6 +288,50 @@ class List {
       return Iterator(nullptr);
     else
       return it;
+  }
+  Iterator find_if(std::function<bool(const T&)> func,
+                   const Iterator& begin = nullptr,
+                   const Iterator& end = nullptr) const {
+    auto it = begin == nullptr ? Iterator(this->head) : begin;
+    for (; it != end && !func(*it); ++it)
+      ;
+
+    if (it == end)
+      return Iterator(nullptr);
+    else
+      return it;
+  }
+  int count_if(std::function<bool(const T&)> func,
+               const Iterator& begin = nullptr,
+               const Iterator& end = nullptr) const {
+    auto it = begin == nullptr ? Iterator(this->head) : begin;
+    int counter = 0;
+    for (; it != end; ++it) counter += func(*it);
+    return counter;
+  }
+  bool all_of(std::function<bool(const T&)> func,
+              const Iterator& begin = nullptr,
+              const Iterator& end = nullptr) const {
+    auto it = begin == nullptr ? Iterator(this->head) : begin;
+    for (; it != end; ++it)
+      if (!func(*it)) return false;
+    return true;
+  }
+  bool any_of(std::function<bool(const T&)> func,
+              const Iterator& begin = nullptr,
+              const Iterator& end = nullptr) const {
+    auto it = begin == nullptr ? Iterator(this->head) : begin;
+    for (; it != end; ++it)
+      if (func(*it)) return true;
+    return false;
+  }
+  bool none_of(std::function<bool(const T&)> func,
+               const Iterator& begin = nullptr,
+               const Iterator& end = nullptr) const {
+    auto it = begin == nullptr ? Iterator(this->head) : begin;
+    for (; it != end; ++it)
+      if (func(*it)) return false;
+    return true;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
