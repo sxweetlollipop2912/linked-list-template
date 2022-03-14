@@ -106,12 +106,12 @@ class List {
                               std::to_string(index) + ".");
     }
 
-    iterator it;
+    const_iterator it;
     if (index < this->size() / 2) {
-      it = iterator(head);
+      it = const_iterator(head);
       for (int i = 1; i <= index; i++) ++it;
     } else {
-      it = iterator(tail);
+      it = const_iterator(tail);
       for (int i = this->size() - 2; i >= index; i--) --it;
     }
 
@@ -201,7 +201,7 @@ class List {
     const_iterator() : ptr{nullptr} {}
     const_iterator(Node<value_type>* const& p) : ptr(p) {}
     const_iterator(const iterator other) : ptr(other.ptr) {}
-    const_iterator(const_iterator& other) : ptr(other.ptr) {}
+    const_iterator(const const_iterator& other) : ptr(other.ptr) {}
     reference operator*() const {
       reference value = ptr->value;
       return value;
@@ -236,7 +236,6 @@ class List {
     }
     const_iterator& operator=(const iterator other) {
       ptr = other.ptr;
-      std::cout << "CONST!\n";
       return *this;
     }
     bool operator==(const const_iterator& it) const { return it.ptr == ptr; }
@@ -249,13 +248,21 @@ class List {
   int size() const { return this->list_size; }
 
   iterator begin() { return iterator(head); }
-  const_iterator begin() const { return iterator(head); }
+  const_iterator begin() const { return const_iterator(head); }
   iterator end() { return iterator(nullptr); }
-  const_iterator end() const { return iterator(nullptr); }
+  const_iterator end() const { return const_iterator(nullptr); }
+  /// Allows modifications
   /// Exception(s): undefined behavior: null pointer dereference
-  T front() const { return this->head->value; }
+  T& front() { return this->head->value; }
+  /// Does not allow modifications.
   /// Exception(s): undefined behavior: null pointer dereference
-  T back() const { return this->tail->value; }
+  const T& front() const { return this->head->value; }
+  /// Allows modifications
+  /// Exception(s): undefined behavior: null pointer dereference
+  T& back() { return this->tail->value; }
+  /// Does not allow modifications.
+  /// Exception(s): undefined behavior: null pointer dereference
+  const T& back() const { return this->tail->value; }
   /// Allows modifications, i.e. `list.at(0) = sth;`
   /// Exception(s): out of range
   T& at(const int& index) { return this->get_node(index)->value; }
@@ -309,20 +316,22 @@ class List {
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  const_iterator find(const T& value, const iterator& begin = nullptr,
-                const iterator& end = nullptr) const {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
+  const_iterator find(const T& value,
+                      const const_iterator& begin = nullptr,
+                      const const_iterator& end = nullptr) const {
+    auto it = begin == nullptr ? const_iterator(this->head) : begin;
     for (; it != end && (*it) != value; ++it)
       ;
 
     if (it == end)
-      return iterator(nullptr);
+      return const_iterator(nullptr);
     else
       return it;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find(const T& value, const iterator& begin = nullptr,
+  iterator find(const T& value,
+                const iterator& begin = nullptr,
                 const iterator& end = nullptr) {
     auto it = begin == nullptr ? iterator(this->head) : begin;
     for (; it != end && (*it) != value; ++it)
@@ -336,14 +345,14 @@ class List {
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
   const_iterator find_if(std::function<bool(const T&)> func,
-                   const iterator& begin = nullptr,
-                   const iterator& end = nullptr) const {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
+                   const const_iterator& begin = nullptr,
+                   const const_iterator& end = nullptr) const {
+    auto it = begin == nullptr ? const_iterator(this->head) : begin;
     for (; it != end && !func(*it); ++it)
       ;
 
     if (it == end)
-      return iterator(nullptr);
+      return const_iterator(nullptr);
     else
       return it;
   }
@@ -364,9 +373,9 @@ class List {
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
   int count_if(std::function<bool(const T&)> func,
-               const iterator& begin = nullptr,
-               const iterator& end = nullptr) const {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
+               const const_iterator& begin = nullptr,
+               const const_iterator& end = nullptr) const {
+    auto it = begin == nullptr ? const_iterator(this->head) : begin;
     int counter = 0;
     for (; it != end; ++it) counter += func(*it);
     return counter;
@@ -374,9 +383,9 @@ class List {
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
   bool all_of(std::function<bool(const T&)> func,
-              const iterator& begin = nullptr,
-              const iterator& end = nullptr) const {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
+              const const_iterator& begin = nullptr,
+              const const_iterator& end = nullptr) const {
+    auto it = begin == nullptr ? const_iterator(this->head) : begin;
     for (; it != end; ++it)
       if (!func(*it)) return false;
     return true;
@@ -384,9 +393,9 @@ class List {
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
   bool any_of(std::function<bool(const T&)> func,
-              const iterator& begin = nullptr,
-              const iterator& end = nullptr) const {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
+              const const_iterator& begin = nullptr,
+              const const_iterator& end = nullptr) const {
+    auto it = begin == nullptr ? const_iterator(this->head) : begin;
     for (; it != end; ++it)
       if (func(*it)) return true;
     return false;
@@ -394,21 +403,22 @@ class List {
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
   bool none_of(std::function<bool(const T&)> func,
-               const iterator& begin = nullptr,
-               const iterator& end = nullptr) const {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
+               const const_iterator& begin = nullptr,
+               const const_iterator& end = nullptr) const {
+    auto it = begin == nullptr ? const_iterator(this->head) : begin;
     for (; it != end; ++it)
       if (func(*it)) return false;
     return true;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  const_iterator find_last(const T& value, const iterator& begin = nullptr,
-                     const iterator& end = nullptr) const {
-    auto rbegin = end == nullptr ? iterator(tail) : end;
+  const_iterator find_last(const T& value,
+                           const const_iterator& begin = nullptr,
+                           const const_iterator& end = nullptr) const {
+    auto rbegin = end == nullptr ? const_iterator(tail) : end;
     if (end != nullptr) --rbegin;
 
-    auto rend = begin == nullptr ? iterator(head) : begin;
+    auto rend = begin == nullptr ? const_iterator(head) : begin;
     --rend;
 
     auto it = rbegin;
@@ -416,13 +426,14 @@ class List {
       ;
 
     if (it == rend)
-      return iterator(nullptr);
+      return const_iterator(nullptr);
     else
       return it;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find_last(const T& value, const iterator& begin = nullptr,
+  iterator find_last(const T& value,
+                     const iterator& begin = nullptr,
                      const iterator& end = nullptr) {
     auto rbegin = end == nullptr ? iterator(tail) : end;
     if (end != nullptr) --rbegin;
