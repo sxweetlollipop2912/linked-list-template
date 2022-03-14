@@ -147,7 +147,7 @@ class List {
     using reference = T&;
 
     Iterator() : ptr{nullptr} {}
-    Iterator(Node<value_type>* p) : ptr(p) {}
+    Iterator(Node<value_type>* const& p) : ptr(p) {}
     reference operator*() const {
       T& value = ptr->value;
       return value;
@@ -176,6 +176,10 @@ class List {
       ptr = ptr->prev;
       return tmp;
     }
+    Iterator& operator=(Node<value_type>* const& p) {
+      ptr = p;
+      return *this;
+    }
     bool operator==(const Iterator& it) const { return it.ptr == ptr; }
     bool operator!=(const Iterator& it) const { return it.ptr != ptr; }
   };
@@ -193,12 +197,20 @@ class List {
   T front() const { return this->head->value; }
   /// Exception(s): undefined behavior: null pointer dereference
   T back() const { return this->tail->value; }
+  /// Allows modifications, i.e. `list.at(0) = sth;`
+  /// Exception(s): out of range
+  T& at(const int& index) { return this->get_node(index)->value; }
   /// Does not allow modifications.
   /// Exception(s): out of range
   const T& at(const int& index) const { return this->get_node(index)->value; }
   /// Allows modifications, i.e. `list.at(0) = sth;`
   /// Exception(s): out of range
-  T& at(const int& index) { return this->get_node(index)->value; }
+  T& operator[](const int& index) { return this->get_node(index)->value; }
+  /// Does not allow modifications.
+  /// Exception(s): out of range
+  const T& operator[](const int& index) const {
+    return this->get_node(index)->value;
+  }
 
   void push_front(const T& value) {
     Node<T>* newNode = new Node<T>(value);
