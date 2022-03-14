@@ -26,37 +26,19 @@ void output(const List<int>& list) {
 int main(int argc, const char* argv[]) {
   List<int> list{1, 2, 3};
   output(list);
-  
-  List<int>::iterator i = list.begin();
-  List<int>::const_iterator ci = i;
-  (*i) = 200;
-  // CRASH
-  //(*ci) = 300;
-  std::cout << (*ci) << "\n\n"; // 200
 
-  list.push_front(0);
-  list.push_back(5);
+  list.push_front(0).push_back(5);
   output(list);
 
-  list.insert_at(4, 4);
+  list.insert_at(4, 4)
+    .insert_at(list.size(), 6)
+    .insert_at(0, -1);
   output(list);
 
-  list.insert_at(list.size(), 6);
+  list.remove_at(0).remove_at(list.size() - 1);
   output(list);
 
-  list.insert_at(0, -1);
-  output(list);
-
-  list.remove_at(0);
-  output(list);
-
-  list.remove_at(list.size() - 1);
-  output(list);
-
-  list.remove_at(1);
-  output(list);
-
-  list.push_back(4);
+  list.remove_at(1).push_back(4);
   std::cout << "----------------------";
   output(list);
   std::cout << "Is 5 an element: " << (list.find(5) != nullptr)
@@ -66,20 +48,13 @@ int main(int argc, const char* argv[]) {
             << (list.find_last(5, list.begin(), list.find_last(4)) != nullptr)
             << "\n\n";
 
-  list.reverse();
+  list.reverse().at(0) = 100;
   output(list);
 
   std::cout << "Is 5 an element: " << (list.find(5) != nullptr)
             << (list.find_last(5) != nullptr) << "\n\n";
-
-  list.at(0) = 100;
-  output(list);
-
-  std::cout << "Is 5 an element: " << (list.find(5) != nullptr)
-            << (list.find_last(5) != nullptr) << "\n\n";
-
-  list.clear();
-  list.push_back(1);
+  
+  list.clear().push_back(1);
   output(list);
 
   list.remove_at(0);

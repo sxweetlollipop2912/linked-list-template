@@ -278,7 +278,7 @@ class List {
     return this->get_node(index)->value;
   }
 
-  void push_front(const T& value) {
+  List<T>& push_front(const T& value) {
     Node<T>* newNode = new Node<T>(value);
     if (this->size() == 0) {
       head = tail = newNode;
@@ -286,8 +286,10 @@ class List {
       ++this->list_size;
     } else
       this->insert_previous(head, newNode);
+    
+    return *this;
   }
-  void push_back(const T& value) {
+  List<T>& push_back(const T& value) {
     Node<T>* newNode = new Node<T>(value);
     if (this->size() == 0) {
       head = tail = newNode;
@@ -295,10 +297,12 @@ class List {
       ++this->list_size;
     } else
       this->insert_next(tail, newNode);
+    
+    return *this;
   }
   /// `value` will be at `index` in resulting list.
   /// Exception(s): out of range
-  void insert_at(const int& index, const T& value) {
+  List<T>& insert_at(const int& index, const T& value) {
     if (index == 0) {
       push_front(value);
     } else if (index == this->size()) {
@@ -308,11 +312,15 @@ class List {
 
       this->insert_next(prev, newNode);
     }
+    
+    return *this;
   }
   /// Exception(s): out of range
-  void remove_at(const int& index) {
+  List<T>& remove_at(const int& index) {
     auto node = this->get_node(index);
     this->remove(node);
+    
+    return *this;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
@@ -451,7 +459,7 @@ class List {
       return it;
   }
   
-  void reverse() {
+  List<T>& reverse() {
     if (!this->is_empty()) {
       for (Node<T>*node = head, *pNext = nullptr; node != nullptr;
            node = pNext) {
@@ -464,8 +472,10 @@ class List {
       head = tail;
       tail = node;
     }
+    
+    return *this;
   }
-  void clear() {
+  List<T>& clear() {
     if (!this->is_empty()) {
       for (Node<T>*node = head, *pNext = nullptr; node != nullptr;
            node = pNext) {
@@ -476,5 +486,7 @@ class List {
 
     head = tail = nullptr;
     this->list_size = 0;
+    
+    return *this;
   }
 };
