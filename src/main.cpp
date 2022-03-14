@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "DoublyLinkedList.h"
 
@@ -10,19 +11,28 @@ void output(const List<int>& list) {
   std::cout << "Is list empty: " << list.is_empty() << '\n';
   std::cout << "front: " << list.front() << '\n';
   std::cout << "back: " << list.back() << '\n';
-  for (int i = 0; i < list.size(); i++) std::cout << list.at(i) << ' ';
-  std::cout << '\n';
   for (int i = 0; i < list.size(); i++) std::cout << list[i] << ' ';
   std::cout << '\n';
   for (auto it = list.begin(); it != list.end(); ++it)
     std::cout << (*it) << ' ';
   std::cout << "\n\n";
+  
+  // CRASH since list.begin() returns a const_iterator
+  // (*list.begin()) = 100;
+  // std::cout << (*list.begin()) << '\n';
 }
 
 
 int main(int argc, const char* argv[]) {
   List<int> list{1, 2, 3};
   output(list);
+  
+  List<int>::iterator i = list.begin();
+  List<int>::const_iterator ci = i;
+  (*i) = 200;
+  // CRASH
+  //(*ci) = 300;
+  std::cout << (*ci) << "\n\n"; // 200
 
   list.push_front(0);
   list.push_back(5);
