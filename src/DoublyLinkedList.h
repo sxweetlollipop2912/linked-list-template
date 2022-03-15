@@ -255,7 +255,7 @@ public:
 
   ~List() {
     this->clear();
-    delete list_end;
+    delete list_end.ptr;
   }
 
 
