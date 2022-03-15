@@ -11,114 +11,10 @@
 
 template <class T>
 class List {
-public:
-  class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
-    friend class List;
+ public:
+  class iterator;
+  class const_iterator;
 
-   private:
-    Node<T>* ptr;
-
-   public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = T;
-    using pointer = T*;
-    using reference = T&;
-
-    iterator() : ptr{nullptr} {}
-    iterator(Node<value_type>* const& p) : ptr(p) {}
-    reference operator*() const {
-      reference value = ptr->value;
-      return value;
-    }
-    /// ???? Copied from stackoverflow, not sure what it means.
-    pointer operator->() { return &*(*this); }
-    /// Prefix increment
-    iterator& operator++() {
-      ptr = ptr->next;
-      return *this;
-    }
-    /// Postfix increment
-    iterator operator++(int) {
-      iterator tmp = *this;
-      ptr = ptr->next;
-      return tmp;
-    }
-    /// Prefix decrement
-    iterator& operator--() {
-      ptr = ptr->prev;
-      return *this;
-    }
-    /// Postfix decrement
-    iterator operator--(int) {
-      iterator tmp = *this;
-      ptr = ptr->prev;
-      return tmp;
-    }
-    iterator& operator=(Node<value_type>* const& p) {
-      ptr = p;
-      return *this;
-    }
-    bool operator==(const iterator& it) const { return it.ptr == ptr; }
-    bool operator!=(const iterator& it) const { return it.ptr != ptr; }
-  };
-  
-  
-  class const_iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
-    friend class List;
-
-   private:
-    const Node<T>* ptr;
-
-   public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = T;
-    using pointer = const T*;
-    using reference = const T&;
-
-    const_iterator() : ptr{nullptr} {}
-    const_iterator(Node<value_type>* const& p) : ptr(p) {}
-    const_iterator(const iterator other) : ptr(other.ptr) {}
-    const_iterator(const const_iterator& other) : ptr(other.ptr) {}
-    reference operator*() const {
-      reference value = ptr->value;
-      return value;
-    }
-    /// ???? Copied from stackoverflow, not sure what it means.
-    pointer operator->() const { return &*(*this); }
-    /// Prefix increment
-    const_iterator& operator++() {
-      ptr = ptr->next;
-      return *this;
-    }
-    /// Postfix increment
-    const_iterator operator++(int) {
-      const_iterator tmp = *this;
-      ptr = ptr->next;
-      return tmp;
-    }
-    /// Prefix decrement
-    const_iterator& operator--() {
-      ptr = ptr->prev;
-      return *this;
-    }
-    /// Postfix decrement
-    const_iterator operator--(int) {
-      const_iterator tmp = *this;
-      ptr = ptr->prev;
-      return tmp;
-    }
-    const_iterator& operator=(Node<value_type>* const& p) {
-      ptr = p;
-      return *this;
-    }
-    const_iterator& operator=(const iterator other) {
-      ptr = other.ptr;
-      return *this;
-    }
-    bool operator==(const const_iterator& it) const { return it.ptr == ptr; }
-    bool operator!=(const const_iterator& it) const { return it.ptr != ptr; }
-  };
-  
  private:
   iterator list_begin, list_end;
   int list_size;
@@ -168,7 +64,7 @@ public:
   /// Delete `node` from list.
   /// Make sure `node` points to an element of this list.
   /// False if `node` is null.
-  bool remove(Node<T>*& node) {
+  bool remove(Node<T>* const& node) {
     if (!node) return false;
 
     if (node->next) {
@@ -226,11 +122,11 @@ public:
       it = this->end();
       for (int i = this->size() - 1; i >= index; i--) --it;
     }
-    
+
     return it.ptr;
   }
 
-  
+
  public:
   List() : list_size{0} {
     Node<T>* end_node = new Node<T>();
@@ -239,18 +135,13 @@ public:
   List(const std::initializer_list<T>& source) : list_size{0} {
     Node<T>* end_node = new Node<T>();
     list_begin = list_end = end_node;
-    
-    for (auto it = source.begin(); it != source.end(); it++) {
-      this->push_back(*it);
-    }
+    for (auto x : source) this->push_back(x);
   }
   List(const List<T>& source) : list_size{0} {
     Node<T>* end_node = new Node<T>();
     list_begin = list_end = end_node;
-    
-    for (auto it = source.begin(); it != source.end(); it++) {
-      this->push_back(*it);
-    }
+
+    for (auto x : source) this->push_back(x);
   }
 
   ~List() {
@@ -297,7 +188,7 @@ public:
   List<T>& push_front(const T& value) {
     Node<T>* newNode = new Node<T>(value);
     this->insert_previous(this->head(), newNode);
-    
+
     return *this;
   }
   List<T>& push_back(const T& value) {
@@ -306,7 +197,7 @@ public:
       this->insert_previous(this->head(), newNode);
     } else
       this->insert_next(this->tail(), newNode);
-    
+
     return *this;
   }
   /// `value` will be at `index` in resulting list.
@@ -321,24 +212,23 @@ public:
 
       this->insert_next(prev, newNode);
     }
-    
+
     return *this;
   }
   /// Exception(s): out of range
   List<T>& remove_at(const int& index) {
     auto node = this->get_node(index);
     this->remove(node);
-    
+
     return *this;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  const_iterator find(const T& value,
-                      const const_iterator& begin = nullptr,
+  const_iterator find(const T& value, const const_iterator& begin = nullptr,
                       const const_iterator& end = nullptr) const {
     auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? const_iterator(this->end()) : end;
-    
+
     for (; it != terminate && (*it) != value; ++it)
       ;
 
@@ -349,12 +239,11 @@ public:
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find(const T& value,
-                const iterator& begin = nullptr,
+  iterator find(const T& value, const iterator& begin = nullptr,
                 const iterator& end = nullptr) {
     auto it = begin == nullptr ? iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? iterator(this->end()) : end;
-    
+
     for (; it != terminate && (*it) != value; ++it)
       ;
 
@@ -366,11 +255,11 @@ public:
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
   const_iterator find_if(std::function<bool(const T&)> func,
-                   const const_iterator& begin = nullptr,
-                   const const_iterator& end = nullptr) const {
+                         const const_iterator& begin = nullptr,
+                         const const_iterator& end = nullptr) const {
     auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? const_iterator(this->end()) : end;
-    
+
     for (; it != terminate && !func(*it); ++it)
       ;
 
@@ -386,7 +275,7 @@ public:
                    const iterator& end = nullptr) {
     auto it = begin == nullptr ? iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? iterator(this->end()) : end;
-    
+
     for (; it != terminate && !func(*it); ++it)
       ;
 
@@ -402,7 +291,7 @@ public:
                const const_iterator& end = nullptr) const {
     auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? const_iterator(this->end()) : end;
-    
+
     int counter = 0;
     for (; it != terminate; ++it) counter += func(*it);
     return counter;
@@ -414,7 +303,7 @@ public:
               const const_iterator& end = nullptr) const {
     auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? const_iterator(this->end()) : end;
-    
+
     for (; it != terminate; ++it)
       if (!func(*it)) return false;
     return true;
@@ -426,7 +315,7 @@ public:
               const const_iterator& end = nullptr) const {
     auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? const_iterator(this->end()) : end;
-    
+
     for (; it != terminate; ++it)
       if (func(*it)) return true;
     return false;
@@ -438,7 +327,7 @@ public:
                const const_iterator& end = nullptr) const {
     auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
     auto terminate = end == nullptr ? const_iterator(this->end()) : end;
-    
+
     for (; it != terminate; ++it)
       if (func(*it)) return false;
     return true;
@@ -465,8 +354,7 @@ public:
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find_last(const T& value,
-                     const iterator& begin = nullptr,
+  iterator find_last(const T& value, const iterator& begin = nullptr,
                      const iterator& end = nullptr) {
     auto rbegin = end == nullptr ? this->end() : end;
     --rbegin;
@@ -483,11 +371,11 @@ public:
     else
       return it;
   }
-  
+
   List<T>& reverse() {
     if (!this->is_empty()) {
-      for (Node<T>*node = this->head(), *pNext = nullptr; node != this->end().ptr;
-           node = pNext) {
+      for (Node<T>*node = this->head(), *pNext = nullptr;
+           node != this->end().ptr; node = pNext) {
         pNext = node->next;
         node->next = node->prev;
         node->prev = pNext;
@@ -495,21 +383,21 @@ public:
 
       auto new_head = this->tail();
       auto new_tail = this->head();
-      
+
       new_head->prev = nullptr;
       new_tail->next = this->end().ptr;
-      
+
       this->head() = new_head;
       this->tail() = new_tail;
     }
-    
+
     return *this;
   }
-  
+
   List<T>& clear() {
     if (!this->is_empty()) {
-      for (Node<T>*node = this->head(), *pNext = nullptr; node != this->end().ptr;
-           node = pNext) {
+      for (Node<T>*node = this->head(), *pNext = nullptr;
+           node != this->end().ptr; node = pNext) {
         pNext = node->next;
         delete node;
       }
@@ -518,9 +406,120 @@ public:
     this->head() = nullptr;
     this->tail() = nullptr;
     this->list_size = 0;
-    
+
     list_begin = list_end;
-    
+
     return *this;
   }
+};
+
+template <class T>
+class List<T>::const_iterator
+    : public std::iterator<std::bidirectional_iterator_tag, T> {
+  friend class List;
+
+ private:
+  const Node<T>* ptr;
+
+ public:
+  using iterator_category = std::bidirectional_iterator_tag;
+  using value_type = T;
+  using pointer = const T*;
+  using reference = const T&;
+
+  const_iterator() : ptr{nullptr} {}
+  const_iterator(Node<value_type>* const& p) : ptr(p) {}
+  const_iterator(const iterator other) : ptr(other.ptr) {}
+  const_iterator(const const_iterator& other) : ptr(other.ptr) {}
+  reference operator*() const {
+    reference value = ptr->value;
+    return value;
+  }
+  /// ???? Copied from stackoverflow, not sure what it means.
+  pointer operator->() const { return &*(*this); }
+  /// Prefix increment
+  const_iterator& operator++() {
+    ptr = ptr->next;
+    return *this;
+  }
+  /// Postfix increment
+  const_iterator operator++(int) {
+    const_iterator tmp = *this;
+    ptr = ptr->next;
+    return tmp;
+  }
+  /// Prefix decrement
+  const_iterator& operator--() {
+    ptr = ptr->prev;
+    return *this;
+  }
+  /// Postfix decrement
+  const_iterator operator--(int) {
+    const_iterator tmp = *this;
+    ptr = ptr->prev;
+    return tmp;
+  }
+  const_iterator& operator=(Node<value_type>* const& p) {
+    ptr = p;
+    return *this;
+  }
+  const_iterator& operator=(const iterator& other) {
+    ptr = other.ptr;
+    return *this;
+  }
+  bool operator==(const const_iterator& it) const { return it.ptr == ptr; }
+  bool operator!=(const const_iterator& it) const { return it.ptr != ptr; }
+};
+
+template <class T>
+class List<T>::iterator
+    : public std::iterator<std::bidirectional_iterator_tag, T> {
+  friend class List;
+
+ private:
+  Node<T>* ptr;
+
+ public:
+  using iterator_category = std::bidirectional_iterator_tag;
+  using value_type = T;
+  using pointer = T*;
+  using reference = T&;
+
+  iterator() : ptr{nullptr} {}
+  iterator(Node<value_type>* const& p) : ptr(p) {}
+  reference operator*() const {
+    reference value = ptr->value;
+    return value;
+  }
+  /// ???? Copied from stackoverflow, not sure what it means.
+  pointer operator->() const { return &*(*this); }
+  /// Prefix increment
+  iterator& operator++() {
+    ptr = ptr->next;
+    return *this;
+  }
+  /// Postfix increment
+  iterator operator++(int) {
+    iterator tmp = *this;
+    ptr = ptr->next;
+    return tmp;
+  }
+  /// Prefix decrement
+  iterator& operator--() {
+    ptr = ptr->prev;
+    return *this;
+  }
+  /// Postfix decrement
+  iterator operator--(int) {
+    iterator tmp = *this;
+    ptr = ptr->prev;
+    return tmp;
+  }
+  iterator& operator=(Node<value_type>* const& p) {
+    ptr = p;
+    return *this;
+  }
+
+  bool operator==(const iterator& it) const { return it.ptr == ptr; }
+  bool operator!=(const iterator& it) const { return it.ptr != ptr; }
 };
