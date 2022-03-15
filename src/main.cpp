@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "DoublyLinkedList.h"
 
@@ -25,60 +24,75 @@ void output(const List<int>& list) {
 
 int main(int argc, const char* argv[]) {
   List<int> list{1, 2, 3};
+  // 3 3
+  std::cout << list.size() << ' ' << std::distance(list.begin(), list.end()) << '\n';
+  // 1 2 3
   output(list);
 
   list.push_front(0).push_back(5);
+  // 0 1 2 3 5
   output(list);
 
   list.insert_at(4, 4)
     .insert_at(list.size(), 6)
     .insert_at(0, -1);
+  // -1 0 1 2 3 4 5 6
   output(list);
 
   list.remove_at(0).remove_at(list.size() - 1);
+  // 0 1 2 3 4 5
   output(list);
 
   list.remove_at(1).push_back(4);
   std::cout << "----------------------";
+  // 0 2 3 4 5 4
   output(list);
+  // true true
   std::cout << "Is 5 an element: " << (list.find(5) != nullptr)
             << (list.find_last(5) != nullptr) << "\n\n";
+  // false true
   std::cout << "Is 5 an element: "
             << (list.find(5, list.begin(), list.find(4)) != nullptr)
             << (list.find_last(5, list.begin(), list.find_last(4)) != nullptr)
             << "\n\n";
 
   list.reverse().at(0) = 100;
+  // 100 5 4 3 2 0
   output(list);
 
+  // true true
   std::cout << "Is 5 an element: " << (list.find(5) != nullptr)
             << (list.find_last(5) != nullptr) << "\n\n";
   
   list.clear().push_back(1);
+  // 1
   output(list);
 
   list.remove_at(0);
+  // empty
   // CRASH at list.front()
   // output(list);
-  
-  list.push_back(0).push_back(1);
-  auto l2 = list.clone().push_back(2);
-  std::cout << "L1 back: " << list.back() << "\nL2 back: " << l2.back() << "\n\n";
 
 
   List<std::string> ll{"acd", "cde", "acc"};
+  // false
   std::cout << (ll.find_if([](const std::string& s) -> bool {
     return s[0] == 'b';
   }) != nullptr)
             << '\n';
+  // 2
   std::cout << (ll.count_if([](const std::string& s) -> bool {
     return s[0] == 'a';
   })) << '\n';
   List<int> ll2{2, 4, 6, 8, 10};
+  // true
   std::cout << ll2.all_of([](const int& value) { return value % 2 == 0; })
             << '\n';
+  
+  // false
   std::cout << ll2.any_of([](const int& value) { return value % 2 != 0; })
             << '\n';
+  // false
   std::cout << ll2.none_of([](const int& value) { return value % 2 != 0; })
             << '\n';
 }

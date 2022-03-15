@@ -11,131 +11,8 @@
 
 template <class T>
 class List {
- private:
-  Node<T>*head, *tail;
-  int list_size;
-
-  /// Insert `next` next to `node`.
-  /// Make sure `node` points to an element of this list.
-  /// Remember to handle `next`->next and `next`->prev before calling this
-  /// method. False if `node` is null or `next` is null while `node`->next is
-  /// not null.
-  bool insert_next(Node<T>*& node, Node<T>*& pNext) {
-    if (!node || (node->next && !pNext)) return false;
-
-    pNext->next = node->next;
-    pNext->prev = node;
-    pNext->prev->next = pNext;
-    if (pNext->next) pNext->next->prev = pNext;
-
-    if (node == this->tail) this->tail = pNext;
-
-    ++this->list_size;
-
-    return true;
-  }
-  /// Insert `prev` previous to `node`.
-  /// Make sure `node` points to an element of this list.
-  /// Remember to handle `prev`->next and `prev`->prev before calling this
-  /// method. False if `node` is null or `prev` is null while `node`->prev is
-  /// not null.
-  bool insert_previous(Node<T>*& node, Node<T>*& pPrev) {
-    if (!node || (node->prev && !pPrev)) return false;
-
-    pPrev->next = node;
-    pPrev->prev = node->prev;
-    pPrev->next->prev = pPrev;
-    if (pPrev->prev) pPrev->prev->next = pPrev;
-
-    if (node == this->head) this->head = pPrev;
-
-    ++this->list_size;
-
-    return true;
-  }
-  /// Delete `node` from list.
-  /// Make sure `node` points to an element of this list.
-  /// False if `node` is null.
-  bool remove(Node<T>*& node) {
-    if (!node) return false;
-
-    if (node->next) {
-      node->next->prev = node->prev;
-    }
-    if (node->prev) {
-      node->prev->next = node->next;
-    }
-
-    if (this->head == node) {
-      head = node->next;
-    }
-    if (this->tail == node) {
-      tail = node->prev;
-    }
-
-    --this->list_size;
-
-    delete node;
-
-    return true;
-  }
-  /// Exception(s): out of range
-  Node<T>* get_node(const int& index) {
-    if (index < 0 || index >= this->size()) {
-      throw std::out_of_range("List of size " + std::to_string(this->size()) +
-                              " is out of range at index " +
-                              std::to_string(index) + ".");
-    }
-
-    iterator it;
-    if (index < this->size() / 2) {
-      it = iterator(head);
-      for (int i = 1; i <= index; i++) ++it;
-    } else {
-      it = iterator(tail);
-      for (int i = this->size() - 2; i >= index; i--) --it;
-    }
-
-    return it.ptr;
-  }
-  /// Exception(s): out of range
-  const Node<T>* get_node(const int& index) const {
-    if (index < 0 || index >= this->size()) {
-      throw std::out_of_range("List of size " + std::to_string(this->size()) +
-                              " is out of range at index " +
-                              std::to_string(index) + ".");
-    }
-
-    const_iterator it;
-    if (index < this->size() / 2) {
-      it = const_iterator(head);
-      for (int i = 1; i <= index; i++) ++it;
-    } else {
-      it = const_iterator(tail);
-      for (int i = this->size() - 2; i >= index; i--) --it;
-    }
-
-    return it.ptr;
-  }
-
- public:
-  List() : head{nullptr}, tail{nullptr}, list_size{0} {}
-  List(const std::initializer_list<T>& source)
-      : head{nullptr}, tail{nullptr}, list_size{0} {
-    for (auto it = source.begin(); it != source.end(); it++) {
-      this->push_back(*it);
-    }
-  }
-  List(const List<T>& source) : head{nullptr}, tail{nullptr}, list_size{0} {
-    for (auto it = source.begin(); it != source.end(); it++) {
-      this->push_back(*it);
-    }
-  }
-
-  ~List() { this->clear(); }
-
-
-  class iterator {
+public:
+  class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
     friend class List;
 
    private:
@@ -186,7 +63,7 @@ class List {
   };
   
   
-  class const_iterator {
+  class const_iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
     friend class List;
 
    private:
@@ -241,28 +118,167 @@ class List {
     bool operator==(const const_iterator& it) const { return it.ptr == ptr; }
     bool operator!=(const const_iterator& it) const { return it.ptr != ptr; }
   };
+  
+ private:
+  iterator list_begin, list_end;
+  int list_size;
+
+  Node<T>*& head() { return list_begin.ptr; };
+  const Node<T>* head() const { return list_begin.ptr; };
+  Node<T>*& tail() { return list_end.ptr->prev; };
+  const Node<T>* tail() const { return list_end.ptr->prev; };
+  /// Insert `next` next to `node`.
+  /// Make sure `node` points to an element of this list.
+  /// Remember to handle `next`->next and `next`->prev before calling this
+  /// method. False if `node` is null or `next` is null while `node`->next is
+  /// not null.
+  bool insert_next(Node<T>*& node, Node<T>*& pNext) {
+    if (!node || (node->next && !pNext)) return false;
+
+    pNext->next = node->next;
+    pNext->prev = node;
+    pNext->prev->next = pNext;
+    if (pNext->next) pNext->next->prev = pNext;
+
+    if (node == this->tail()) this->tail() = pNext;
+
+    ++this->list_size;
+
+    return true;
+  }
+  /// Insert `prev` previous to `node`.
+  /// Make sure `node` points to an element of this list.
+  /// Remember to handle `prev`->next and `prev`->prev before calling this
+  /// method. False if `node` is null or `prev` is null while `node`->prev is
+  /// not null.
+  bool insert_previous(Node<T>*& node, Node<T>*& pPrev) {
+    if (!node || (node->prev && !pPrev)) return false;
+
+    pPrev->next = node;
+    pPrev->prev = node->prev;
+    pPrev->next->prev = pPrev;
+    if (pPrev->prev) pPrev->prev->next = pPrev;
+
+    if (node == this->head()) this->head() = pPrev;
+
+    ++this->list_size;
+
+    return true;
+  }
+  /// Delete `node` from list.
+  /// Make sure `node` points to an element of this list.
+  /// False if `node` is null.
+  bool remove(Node<T>*& node) {
+    if (!node) return false;
+
+    if (node->next) {
+      node->next->prev = node->prev;
+    }
+    if (node->prev) {
+      node->prev->next = node->next;
+    }
+
+    if (this->head() == node) {
+      this->head() = node->next;
+    }
+    if (this->tail() == node) {
+      this->tail() = node->prev;
+    }
+
+    --this->list_size;
+
+    delete node;
+
+    return true;
+  }
+  /// Exception(s): out of range
+  Node<T>* get_node(const int& index) {
+    if (index < 0 || index >= this->size()) {
+      throw std::out_of_range("List of size " + std::to_string(this->size()) +
+                              " is out of range at index " +
+                              std::to_string(index) + ".");
+    }
+
+    iterator it;
+    if (index < this->size() / 2) {
+      it = this->begin();
+      for (int i = 1; i <= index; i++) ++it;
+    } else {
+      it = this->end();
+      for (int i = this->size() - 1; i >= index; i--) --it;
+    }
+
+    return it.ptr;
+  }
+  /// Exception(s): out of range
+  const Node<T>* get_node(const int& index) const {
+    if (index < 0 || index >= this->size()) {
+      throw std::out_of_range("List of size " + std::to_string(this->size()) +
+                              " is out of range at index " +
+                              std::to_string(index) + ".");
+    }
+
+    const_iterator it;
+    if (index < this->size() / 2) {
+      it = this->begin();
+      for (int i = 1; i <= index; i++) ++it;
+    } else {
+      it = this->end();
+      for (int i = this->size() - 1; i >= index; i--) --it;
+    }
+    
+    return it.ptr;
+  }
+
+  
+ public:
+  List() : list_size{0} {
+    Node<T>* end_node = new Node<T>();
+    list_begin = list_end = end_node;
+  }
+  List(const std::initializer_list<T>& source) : list_size{0} {
+    Node<T>* end_node = new Node<T>();
+    list_begin = list_end = end_node;
+    
+    for (auto it = source.begin(); it != source.end(); it++) {
+      this->push_back(*it);
+    }
+  }
+  List(const List<T>& source) : list_size{0} {
+    Node<T>* end_node = new Node<T>();
+    list_begin = list_end = end_node;
+    
+    for (auto it = source.begin(); it != source.end(); it++) {
+      this->push_back(*it);
+    }
+  }
+
+  ~List() {
+    this->clear();
+    delete list_end;
+  }
 
 
   bool is_empty() const { return this->size() == 0; }
   int length() const { return this->list_size; }
   int size() const { return this->list_size; }
 
-  iterator begin() { return iterator(head); }
-  const_iterator begin() const { return const_iterator(head); }
-  iterator end() { return iterator(nullptr); }
-  const_iterator end() const { return const_iterator(nullptr); }
+  iterator begin() { return list_begin; }
+  const_iterator begin() const { return list_begin; }
+  iterator end() { return list_end; }
+  const_iterator end() const { return list_end; }
   /// Allows modifications
   /// Exception(s): undefined behavior: null pointer dereference
-  T& front() { return this->head->value; }
+  T& front() { return this->head()->value; }
   /// Does not allow modifications.
   /// Exception(s): undefined behavior: null pointer dereference
-  const T& front() const { return this->head->value; }
+  const T& front() const { return this->head()->value; }
   /// Allows modifications
   /// Exception(s): undefined behavior: null pointer dereference
-  T& back() { return this->tail->value; }
+  T& back() { return this->tail()->value; }
   /// Does not allow modifications.
   /// Exception(s): undefined behavior: null pointer dereference
-  const T& back() const { return this->tail->value; }
+  const T& back() const { return this->tail()->value; }
   /// Allows modifications, i.e. `list.at(0) = sth;`
   /// Exception(s): out of range
   T& at(const int& index) { return this->get_node(index)->value; }
@@ -280,23 +296,16 @@ class List {
 
   List<T>& push_front(const T& value) {
     Node<T>* newNode = new Node<T>(value);
-    if (this->size() == 0) {
-      head = tail = newNode;
-
-      ++this->list_size;
-    } else
-      this->insert_previous(head, newNode);
+    this->insert_previous(this->head(), newNode);
     
     return *this;
   }
   List<T>& push_back(const T& value) {
     Node<T>* newNode = new Node<T>(value);
     if (this->size() == 0) {
-      head = tail = newNode;
-
-      ++this->list_size;
+      this->insert_previous(this->head(), newNode);
     } else
-      this->insert_next(tail, newNode);
+      this->insert_next(this->tail(), newNode);
     
     return *this;
   }
@@ -327,12 +336,14 @@ class List {
   const_iterator find(const T& value,
                       const const_iterator& begin = nullptr,
                       const const_iterator& end = nullptr) const {
-    auto it = begin == nullptr ? const_iterator(this->head) : begin;
-    for (; it != end && (*it) != value; ++it)
+    auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? const_iterator(this->end()) : end;
+    
+    for (; it != terminate && (*it) != value; ++it)
       ;
 
-    if (it == end)
-      return const_iterator(nullptr);
+    if (it == terminate)
+      return const_iterator(end);
     else
       return it;
   }
@@ -341,12 +352,14 @@ class List {
   iterator find(const T& value,
                 const iterator& begin = nullptr,
                 const iterator& end = nullptr) {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
-    for (; it != end && (*it) != value; ++it)
+    auto it = begin == nullptr ? iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? iterator(this->end()) : end;
+    
+    for (; it != terminate && (*it) != value; ++it)
       ;
 
-    if (it == end)
-      return iterator(nullptr);
+    if (it == terminate)
+      return iterator(end);
     else
       return it;
   }
@@ -355,12 +368,14 @@ class List {
   const_iterator find_if(std::function<bool(const T&)> func,
                    const const_iterator& begin = nullptr,
                    const const_iterator& end = nullptr) const {
-    auto it = begin == nullptr ? const_iterator(this->head) : begin;
-    for (; it != end && !func(*it); ++it)
+    auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? const_iterator(this->end()) : end;
+    
+    for (; it != terminate && !func(*it); ++it)
       ;
 
-    if (it == end)
-      return const_iterator(nullptr);
+    if (it == terminate)
+      return const_iterator(end);
     else
       return it;
   }
@@ -369,12 +384,14 @@ class List {
   iterator find_if(std::function<bool(const T&)> func,
                    const iterator& begin = nullptr,
                    const iterator& end = nullptr) {
-    auto it = begin == nullptr ? iterator(this->head) : begin;
-    for (; it != end && !func(*it); ++it)
+    auto it = begin == nullptr ? iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? iterator(this->end()) : end;
+    
+    for (; it != terminate && !func(*it); ++it)
       ;
 
-    if (it == end)
-      return iterator(nullptr);
+    if (it == terminate)
+      return iterator(end);
     else
       return it;
   }
@@ -383,9 +400,11 @@ class List {
   int count_if(std::function<bool(const T&)> func,
                const const_iterator& begin = nullptr,
                const const_iterator& end = nullptr) const {
-    auto it = begin == nullptr ? const_iterator(this->head) : begin;
+    auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? const_iterator(this->end()) : end;
+    
     int counter = 0;
-    for (; it != end; ++it) counter += func(*it);
+    for (; it != terminate; ++it) counter += func(*it);
     return counter;
   }
   /// Make sure `begin` and `end` both point to elements in the same list.
@@ -393,8 +412,10 @@ class List {
   bool all_of(std::function<bool(const T&)> func,
               const const_iterator& begin = nullptr,
               const const_iterator& end = nullptr) const {
-    auto it = begin == nullptr ? const_iterator(this->head) : begin;
-    for (; it != end; ++it)
+    auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? const_iterator(this->end()) : end;
+    
+    for (; it != terminate; ++it)
       if (!func(*it)) return false;
     return true;
   }
@@ -403,8 +424,10 @@ class List {
   bool any_of(std::function<bool(const T&)> func,
               const const_iterator& begin = nullptr,
               const const_iterator& end = nullptr) const {
-    auto it = begin == nullptr ? const_iterator(this->head) : begin;
-    for (; it != end; ++it)
+    auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? const_iterator(this->end()) : end;
+    
+    for (; it != terminate; ++it)
       if (func(*it)) return true;
     return false;
   }
@@ -413,8 +436,10 @@ class List {
   bool none_of(std::function<bool(const T&)> func,
                const const_iterator& begin = nullptr,
                const const_iterator& end = nullptr) const {
-    auto it = begin == nullptr ? const_iterator(this->head) : begin;
-    for (; it != end; ++it)
+    auto it = begin == nullptr ? const_iterator(this->begin()) : begin;
+    auto terminate = end == nullptr ? const_iterator(this->end()) : end;
+    
+    for (; it != terminate; ++it)
       if (func(*it)) return false;
     return true;
   }
@@ -423,10 +448,10 @@ class List {
   const_iterator find_last(const T& value,
                            const const_iterator& begin = nullptr,
                            const const_iterator& end = nullptr) const {
-    auto rbegin = end == nullptr ? const_iterator(tail) : end;
-    if (end != nullptr) --rbegin;
+    auto rbegin = end == nullptr ? this->end() : end;
+    --rbegin;
 
-    auto rend = begin == nullptr ? const_iterator(head) : begin;
+    auto rend = begin == nullptr ? const_iterator(this->begin()) : begin;
     --rend;
 
     auto it = rbegin;
@@ -434,7 +459,7 @@ class List {
       ;
 
     if (it == rend)
-      return const_iterator(nullptr);
+      return const_iterator(end);
     else
       return it;
   }
@@ -443,10 +468,10 @@ class List {
   iterator find_last(const T& value,
                      const iterator& begin = nullptr,
                      const iterator& end = nullptr) {
-    auto rbegin = end == nullptr ? iterator(tail) : end;
-    if (end != nullptr) --rbegin;
+    auto rbegin = end == nullptr ? this->end() : end;
+    --rbegin;
 
-    auto rend = begin == nullptr ? iterator(head) : begin;
+    auto rend = begin == nullptr ? iterator(this->begin()) : begin;
     --rend;
 
     auto it = rbegin;
@@ -454,38 +479,47 @@ class List {
       ;
 
     if (it == rend)
-      return iterator(nullptr);
+      return iterator(end);
     else
       return it;
   }
   
   List<T>& reverse() {
     if (!this->is_empty()) {
-      for (Node<T>*node = head, *pNext = nullptr; node != nullptr;
+      for (Node<T>*node = this->head(), *pNext = nullptr; node != this->end().ptr;
            node = pNext) {
         pNext = node->next;
         node->next = node->prev;
         node->prev = pNext;
       }
 
-      Node<T>* node = head;
-      head = tail;
-      tail = node;
+      auto new_head = this->tail();
+      auto new_tail = this->head();
+      
+      new_head->prev = nullptr;
+      new_tail->next = this->end().ptr;
+      
+      this->head() = new_head;
+      this->tail() = new_tail;
     }
     
     return *this;
   }
+  
   List<T>& clear() {
     if (!this->is_empty()) {
-      for (Node<T>*node = head, *pNext = nullptr; node != nullptr;
+      for (Node<T>*node = this->head(), *pNext = nullptr; node != this->end().ptr;
            node = pNext) {
         pNext = node->next;
         delete node;
       }
     }
 
-    head = tail = nullptr;
+    this->head() = nullptr;
+    this->tail() = nullptr;
     this->list_size = 0;
+    
+    list_begin = list_end;
     
     return *this;
   }
