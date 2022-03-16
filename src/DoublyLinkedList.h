@@ -1,4 +1,5 @@
 #pragma once
+
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 
@@ -21,49 +22,50 @@ class List {
  private:
   iterator list_begin, list_end;
   int list_size;
-  /// False if either `it` or `it_next` is `end()`` or null.
-  bool insert_next(iterator& it, iterator& it_next) {
-    if (it == this->end() || it == nullptr || it_next == this->end() ||
-        it_next == nullptr)
-      return false;
-
-    Node<T>*& node = it.ptr;
-    Node<T>*& p_next = it_next.ptr;
-
-    p_next->next = node->next;
-    p_next->prev = node;
-    p_next->prev->next = p_next;
-    p_next->next->prev = p_next;
-
-    ++this->list_size;
-
-    return true;
-  }
-  /// False if either `it` and `it_prev` is null or `it_prev` is `end()`.
-  bool insert_previous(const iterator& it, const iterator& it_prev) {
-    if (it.ptr == nullptr || it_prev == this->end() || it_prev.ptr == nullptr)
-      return false;
-
+  /// Exception(s): undefined behavior: null pointer dereference
+  void insert_previous(const iterator& it, const iterator& it_prev) {
     Node<T>* node = it.ptr;
     Node<T>* p_prev = it_prev.ptr;
 
     p_prev->next = node;
     p_prev->prev = node->prev;
     p_prev->next->prev = p_prev;
-    if (p_prev->prev) p_prev->prev->next = p_prev;
+    if (p_prev->prev)
+      p_prev->prev->next = p_prev;
 
     if (it == this->begin()) list_begin = p_prev;
 
     ++this->list_size;
-
-    return true;
+  }
+  /// Move nodes from a list of range [`first`, `last`) before `it`.
+  /// Exception(s): undefined behavior: null pointer dereference
+  void move_previous(const iterator& pos,
+                  const iterator& first,
+                  const iterator& last) {
+    list_size += std::distance(first, last);
+    
+    auto node = pos.ptr;
+    auto node_first = first.ptr;
+    auto node_last = last.ptr->prev;
+    
+    node_first->prev = node->prev;
+    if (node->prev)
+      node->prev->next = node_first;
+    
+    node_last->next = node;
+    node->prev = node_last;
+    
+    if (this->begin() == pos)
+      list_begin = first;
   }
   /// Delete the node at `it` tfrom list.
-  /// Make sure `it` belongs to this list.
-  /// False if `it` is `end()` or the node at `it` is null.
-  bool remove(iterator& it) {
-    if (it == this->end() || it.ptr == nullptr) return false;
-
+  /// Make sure `it` belongs to this list and not its end.
+  /// Exception(s): undefined behavior: null pointer dereference, out of range
+  void remove(iterator& it) {
+    if (it == this->end()) {
+      throw std::out_of_range("Trying to get access to end pointer.");
+    }
+    
     Node<T>* node = it.ptr;
 
     if (node->next) {
@@ -81,11 +83,9 @@ class List {
 
     delete node;
     it.ptr = nullptr;
-
-    return true;
   }
   /// Exception(s): out of range
-  iterator get_iterator(const int& index) {
+  iterator get_iterator(const int index) {
     if (index < 0 || index >= this->size()) {
       throw std::out_of_range("List of size " + std::to_string(this->size()) +
                               " is out of range at index " +
@@ -104,7 +104,7 @@ class List {
     return it;
   }
   /// Exception(s): out of range
-  const_iterator get_iterator(const int& index) const {
+  const_iterator get_iterator(const int index) const {
     if (index < 0 || index >= this->size()) {
       throw std::out_of_range("List of size " + std::to_string(this->size()) +
                               " is out of range at index " +
@@ -125,26 +125,23 @@ class List {
 
  public:
   List() : list_size{0} {
-    Node<T>* end_node = new Node<T>();
-    list_begin = list_end = end_node;
+    list_begin = list_end = new Node<T>();
   }
   List(const std::initializer_list<T>& source) : list_size{0} {
-    Node<T>* end_node = new Node<T>();
-    list_begin = list_end = end_node;
+    list_begin = list_end = new Node<T>();
     for (const auto& x : source) this->push_back(x);
   }
   List(const List<T>& source) : list_size{0} {
-    Node<T>* end_node = new Node<T>();
-    list_begin = list_end = end_node;
+    list_begin = list_end = new Node<T>();
 
     for (const auto& x : source) this->push_back(x);
   }
-  List(List<T>&& source)
-      : list_begin{source.list_begin},
-        list_end{source.list_end},
-        list_size{source.list_size} {
-    source.list_begin = nullptr;
-    source.list_end = nullptr;
+  List(List<T>&& source) {
+    list_begin = list_end = new Node<T>();
+    move_previous(this->end(), source.begin(), source.end());
+    
+    source.list_begin = source.list_end;
+    source.list_end.ptr->prev = nullptr;
     source.list_size = 0;
   }
   ~List() {
@@ -160,38 +157,38 @@ class List {
   const_iterator begin() const { return list_begin; }
   iterator end() { return list_end; }
   const_iterator end() const { return list_end; }
-  /// Allows modifications
+  /// Allow modifications
   /// Exception(s): undefined behavior: null pointer dereference
   T& front() { return *this->begin(); }
   /// Does not allow modifications.
   /// Exception(s): undefined behavior: null pointer dereference
   const T& front() const { return *this->begin(); }
-  /// Allows modifications
+  /// Allow modifications
   /// Exception(s): undefined behavior: null pointer dereference
   T& back() {
     auto it = this->end();
     --it;
     return *it;
   }
-  /// Does not allow modifications.
+  /// Do not allow modifications.
   /// Exception(s): undefined behavior: null pointer dereference
   const T& back() const {
     auto it = this->end();
     --it;
     return *it;
   }
-  /// Allows modifications, i.e. `list[0] = sth;`
+  /// Allow modifications, i.e. `list[0] = sth;`
   /// Exception(s): out of range
-  T& operator[](const int& index) { return *get_iterator(index); }
-  /// Does not allow modifications.
+  T& operator[](const int index) { return *get_iterator(index); }
+  /// Do not allow modifications.
   /// Exception(s): out of range
-  const T& operator[](const int& index) const { return *get_iterator(index); }
-  /// Allows modifications, i.e. `list.at(0) = sth;`
+  const T& operator[](const int index) const { return *get_iterator(index); }
+  /// Allow modifications, i.e. `list.at(0) = sth;`
   /// Exception(s): out of range
-  T& at(const int& index) { return (*this)[index]; }
-  /// Does not allow modifications.
+  T& at(const int index) { return (*this)[index]; }
+  /// Do not allow modifications.
   /// Exception(s): out of range
-  const T& at(const int& index) const { return (*this)[index]; }
+  const T& at(const int index) const { return (*this)[index]; }
 
   List<T>& push_front(const T& value) {
     Node<T>* new_node = new Node<T>(value);
@@ -207,7 +204,8 @@ class List {
   }
   /// `value` will be at `index` in resulting list.
   /// Exception(s): out of range
-  List<T>& insert_at(const int& index, const T& value) {
+  List<T>& insert_at(const int index,
+                     const T& value) {
     if (index == 0) {
       this->push_front(value);
     } else if (index == this->size()) {
@@ -222,7 +220,7 @@ class List {
     return *this;
   }
   /// Exception(s): out of range
-  List<T>& remove_at(const int& index) {
+  List<T>& remove_at(const int index) {
     auto it = this->get_iterator(index);
     this->remove(it);
 
@@ -432,8 +430,8 @@ class List<T>::iterator
 
  public:
   using iterator_category = std::bidirectional_iterator_tag;
-  using difference_type = T;
   using value_type = T;
+  using difference_type = std::ptrdiff_t;
   using pointer = T*;
   using reference = T&;
 
@@ -478,7 +476,7 @@ class List<T>::iterator
 
 template <class T>
 class List<T>::const_iterator
-    : public std::iterator<std::bidirectional_iterator_tag, T, T, T*, T&> {
+    : public std::iterator<std::bidirectional_iterator_tag, T, std::ptrdiff_t, T*, T&> {
   friend class List;
 
  private:
@@ -486,8 +484,8 @@ class List<T>::const_iterator
 
  public:
   using iterator_category = std::bidirectional_iterator_tag;
-  using difference_type = T;
   using value_type = T;
+  using difference_type = std::ptrdiff_t;
   using pointer = const T*;
   using reference = const T&;
 
