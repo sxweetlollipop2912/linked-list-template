@@ -139,7 +139,14 @@ class List {
 
     for (const auto& x : source) this->push_back(x);
   }
-
+  List(List<T>&& source)
+      : list_begin{source.list_begin},
+        list_end{source.list_end},
+        list_size{source.list_size} {
+    source.list_begin = nullptr;
+    source.list_end = nullptr;
+    source.list_size = 0;
+  }
   ~List() {
     this->clear();
     delete list_end.ptr;
@@ -383,9 +390,20 @@ class List {
     return *this;
   }
   List<T>& operator=(const List<T>& source) {
+    if (this == &source) return *this;
     this->clear();
     for (const auto& x : source) this->push_back(x);
     return *this;
+  }
+  List<T>& operator=(List<T>&& source) {
+    if (this == &source) return *this;
+    this->clear();
+    this->list_begin = source.list_begin;
+    this->list_end = source.list_end;
+    this->list_size = source.list_size;
+    source.list_begin = nullptr;
+    source.list_end = nullptr;
+    source.list_size = 0;
   }
   List<T>& clear() {
     if (!this->empty()) {
