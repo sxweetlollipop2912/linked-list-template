@@ -382,7 +382,11 @@ class List {
 
     return *this;
   }
-
+  List<T>& operator=(const List<T>& source) {
+    this->clear();
+    for (const auto& x : source) this->push_back(x);
+    return *this;
+  }
   List<T>& clear() {
     if (!this->empty()) {
       for (auto it = this->begin(); it != this->end();) {
