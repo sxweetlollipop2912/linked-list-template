@@ -142,7 +142,7 @@ int main(int argc, const char* argv[]) {
   output(l2);
   
   l2.assign({4, 3, 1, 2, 7, 9, 8, 6, 5});
-  l2.sort();
+  l2.sort([](int x, int y) { return x > y; });
   // 1 2 3 4 5 6 7 8 9
   output(l2);
 
