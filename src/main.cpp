@@ -118,6 +118,9 @@ int main(int argc, const char* argv[]) {
   // empty
   // error at l2.back()
   // output(l2);
+  
+  list.erase(list.begin());
+  output(list);
 
   List<std::string> ll{"acd", "cde", "acc"};
   // false
