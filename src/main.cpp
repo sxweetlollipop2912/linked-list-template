@@ -129,6 +129,15 @@ int main(int argc, const char* argv[]) {
   // empty
   // error at l2.back()
   // output(l2);
+  
+  l2.assign(10, 1);
+  output(l2);
+  
+  l2.assign(++list.begin(), list.end());
+  output(l2);
+  
+  l2.assign( {1, 2, 3} );
+  output(l2);
 
   List<std::string> ll{"acd", "cde", "acc"};
   // false
