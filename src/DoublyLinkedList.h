@@ -58,32 +58,6 @@ class List {
     if (this->begin() == pos)
       list_begin = first;
   }
-  /// Delete the node at `it` tfrom list.
-  /// Make sure `it` belongs to this list and not its end.
-  /// Exception(s): undefined behavior: null pointer dereference, out of range
-  void remove(iterator& it) {
-    if (it == this->end()) {
-      throw std::out_of_range("Trying to get access to end pointer.");
-    }
-    
-    Node<T>* node = it.ptr;
-
-    if (node->next) {
-      node->next->prev = node->prev;
-    }
-    if (node->prev) {
-      node->prev->next = node->next;
-    }
-
-    if (this->begin() == it) {
-      ++list_begin;
-    }
-
-    --this->list_size;
-
-    delete node;
-    it.ptr = nullptr;
-  }
   /// Exception(s): out of range
   iterator get_iterator(const int index) {
     if (index < 0 || index >= this->size()) {
@@ -205,14 +179,14 @@ class List {
   /// Exception(s): out of range
   List<T>& pop_front() {
     auto it = this->begin();
-    this->remove(it);
+    this->erase(it);
     
     return *this;
   }
   /// Exception(s): undefined behavior: null pointer dereference
   List<T>& pop_back() {
     auto it = --this->end();
-    this->remove(it);
+    this->erase(it);
     
     return *this;
   }
@@ -264,30 +238,58 @@ class List {
     
     return *this;
   }
-  /// Exception(s): out of range
-  List<T>& remove_at(const int index) {
-    auto it = this->get_iterator(index);
-    this->remove(it);
+  /// Erase the node at `it` tfrom list.
+  /// Make sure `it` belongs to this list.
+  /// Exception(s): undefined behavior: null pointer dereference, out of range
+  List<T>& erase(iterator it) {
+    if (it == this->end()) {
+      throw std::out_of_range("Trying to erase end pointer.");
+    }
+    
+    Node<T>* node = it.ptr;
 
+    if (node->next) {
+      node->next->prev = node->prev;
+    }
+    if (node->prev) {
+      node->prev->next = node->next;
+    }
+
+    if (this->begin() == it) {
+      ++list_begin;
+    }
+
+    --this->list_size;
+
+    delete node;
+    it.ptr = nullptr;
+    
     return *this;
   }
-  List<T>& remove(const T& value) {
+  List<T>& erase(const T& value) {
     for(auto it = this->begin(); it != this->end();) {
       auto next = it;
       ++next;
       if ((*it) == value)
-        this->remove(it);
+        this->erase(it);
       it = next;
     }
     
     return *this;
   }
-  List<T>& remove_if(std::function<bool(const T&)> func) {
+  /// Exception(s): out of range
+  List<T>& erase_at(const int index) {
+    auto it = this->get_iterator(index);
+    this->erase(it);
+
+    return *this;
+  }
+  List<T>& erase_if(std::function<bool(const T&)> func) {
     for(auto it = this->begin(); it != this->end();) {
       auto next = it;
       ++next;
       if (func(*it))
-        this->remove(it);
+        this->erase(it);
       it = next;
     }
     

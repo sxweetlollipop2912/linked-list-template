@@ -37,11 +37,11 @@ int main(int argc, const char* argv[]) {
   // -1 0 1 2 3 4 5 6
   output(list);
   
-  (list.remove_at(0)).remove_at(list.size() - 1);
+  (list.erase_at(0)).erase_at(list.size() - 1);
   // 0 1 2 3 4 5
   output(list);
 
-  list.remove_at(1).push_back(4);
+  list.erase_at(1).push_back(4);
   std::cout << "----------------------";
   // 0 2 3 4 5 4
   output(list);
@@ -66,7 +66,7 @@ int main(int argc, const char* argv[]) {
   // 1
   output(list);
 
-  list.remove_at(0);
+  list.erase_at(0);
   // empty
   // error at list.front()
   // output(list);
@@ -91,11 +91,11 @@ int main(int argc, const char* argv[]) {
   // 0 0 1 3 2 3 4 5 6 7 7 0 0 7
   output(list);
   
-  list.remove(3);
+  list.erase(3);
   // 0 0 1 2 4 5 6 7 7 0 0 7
   output(list);
   
-  list.remove_if([](int x) { return x == 7; });
+  list.erase_if([](int x) { return x == 7; });
   // 0 0 1 2 4 5 6 7 7 0 0 7
   output(list);
   
@@ -107,7 +107,7 @@ int main(int argc, const char* argv[]) {
   // 0 1 2 4 5 6 0 10
   output(list);
   
-  list.remove_at(6);
+  list.erase_at(6);
   // 0 1 2 4 5 6 10
   output(list);
   
