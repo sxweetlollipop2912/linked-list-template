@@ -29,19 +29,24 @@ int main(int argc, const char* argv[]) {
   // 1 2 3
   output(list);
 
-  list.push_front(0).push_back(5);
+  list.push_front(0);
+  list.push_back(5);
   // 0 1 2 3 5
   output(list);
 
-  list.insert_at(4, 4).insert_at(list.size(), 6).insert_at(0, -1);
+  list.insert_at(4, 4);
+  list.insert_at(list.size(), 6);
+  list.insert_at(0, -1);
   // -1 0 1 2 3 4 5 6
   output(list);
   
-  (list.remove_at(0)).remove_at(list.size() - 1);
+  list.remove_at(0);
+  list.remove_at(list.size() - 1);
   // 0 1 2 3 4 5
   output(list);
 
-  list.remove_at(1).push_back(4);
+  list.remove_at(1);
+  list.push_back(4);
   std::cout << "----------------------";
   // 0 2 3 4 5 4
   output(list);
@@ -54,7 +59,8 @@ int main(int argc, const char* argv[]) {
             << (list.find_last(5, list.begin(), list.find_last(4)) != nullptr)
             << "\n\n";
 
-  list.reverse().at(0) = 100;
+  list.reverse();
+  list.at(0) = 100;
   // 100 5 4 3 2 0
   output(list);
 
@@ -62,7 +68,8 @@ int main(int argc, const char* argv[]) {
   std::cout << "Is 5 an element: " << (list.find(5) != list.end())
             << (list.find_last(5) != list.end()) << "\n\n";
 
-  list.clear().push_back(1);
+  list.clear();
+  list.push_back(1);
   // 1
   output(list);
 
@@ -75,15 +82,19 @@ int main(int argc, const char* argv[]) {
   // 1 2 3 4 5 6
   output(list);
   
-  list.pop_front().pop_back();
+  list.pop_front();
+  list.pop_back();
   // 2 3 4 5
   output(list);
   
-  list.insert(list.begin(), 1).insert(++list.begin(), 3).insert(list.end(), 6);
+  list.insert(list.begin(), 1);
+  list.insert(++list.begin(), 3);
+  list.insert(list.end(), 6);
   // 1 3 2 3 4 5 6
   output(list);
   
-  list.insert(list.begin(), 2, 0).insert(list.end(), 3, 7);
+  list.insert(list.begin(), 2, 0);
+  list.insert(list.end(), 3, 7);
   // 0 0 1 3 2 3 4 5 6 7 7 7
   output(list);
   
@@ -96,7 +107,7 @@ int main(int argc, const char* argv[]) {
   output(list);
   
   list.remove_if([](int x) { return x == 7; });
-  // 0 0 1 2 4 5 6 7 7 0 0 7
+  // 0 0 1 2 4 5 6 0 0
   output(list);
   
   list.resize(11, 10);
