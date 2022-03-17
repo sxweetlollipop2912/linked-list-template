@@ -319,7 +319,7 @@ class List {
     
     return *this;
   }
-  List<T>& unique(std::function<bool(const T&)> func) {
+  List<T>& unique(std::function<bool(const T&, const T&)> func) {
     auto last = --std::unique(this->begin(), this->end(), func);
     while (--this->end() != last)
       this->pop_back();

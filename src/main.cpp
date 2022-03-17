@@ -103,7 +103,7 @@ int main(int argc, const char* argv[]) {
   // 0 0 1 2 4 5 6 0 0 10 10
   output(list);
   
-  list.unique();
+  list.unique([] (int x, int y) { return x == y; });
   // 0 1 2 4 5 6 0 10
   output(list);
   
