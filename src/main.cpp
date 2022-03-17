@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <list>
 #include "DoublyLinkedList.h"
 
 void output(const List<int>& list) {
@@ -23,6 +23,9 @@ struct coord {
 };
 
 int main(int argc, const char* argv[]) {
+  std::list<int> l{3,2,1};
+  l.sort();
+  
   List<int>&& list{1, 2, 3};
   std::cout << list.size() << ' ' << std::distance(list.begin(), list.end())
             << '\n';
@@ -131,12 +134,16 @@ int main(int argc, const char* argv[]) {
   // output(l2);
   
   l2.assign(10, 1);
+  // 1 1 1 1 1 1 1 1 1 1
   output(l2);
   
   l2.assign(++list.begin(), list.end());
+  // 1 2 3 4 5 6 7 8 9 10 11
   output(l2);
   
-  l2.assign( {1, 2, 3} );
+  l2.assign({4, 3, 1, 2, 7, 9, 8, 6, 5});
+  l2.sort();
+  // 1 2 3 4 5 6 7 8 9
   output(l2);
 
   List<std::string> ll{"acd", "cde", "acc"};

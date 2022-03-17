@@ -23,6 +23,11 @@ class List {
   iterator list_begin, list_end;
   int list_size;
   
+  void reset() {
+    this->list_begin = this->list_end;
+    this->list_end.ptr->prev = nullptr;
+    this->list_size = 0;
+  }
   /// Exception(s): undefined behavior: null pointer dereference
   void insert_previous(const iterator& it, const iterator& it_prev) {
     Node<T>* node = it.ptr;
@@ -48,19 +53,21 @@ class List {
     
     auto prev = pos; --prev;
     
-    auto node = pos.ptr;
-    auto node_first = first.ptr;
-    auto node_last = last.ptr->prev;
-    
-    node_first->prev = node->prev;
-    if (node->prev)
-      node->prev->next = node_first;
-    
-    node_last->next = node;
-    node->prev = node_last;
-    
-    if (this->begin() == pos)
-      list_begin = first;
+    if (first != last) {
+      auto node = pos.ptr;
+      auto node_first = first.ptr;
+      auto node_last = last.ptr->prev;
+      
+      node_first->prev = node->prev;
+      if (node->prev)
+        node->prev->next = node_first;
+      
+      node_last->next = node;
+      node->prev = node_last;
+      
+      if (this->begin() == pos)
+        list_begin = first;
+    }
     
     return prev == nullptr? this->begin() : ++prev;
   }
@@ -154,10 +161,7 @@ class List {
   List(List<T>&& source) {
     list_begin = list_end = new Node<T>();
     move_previous(this->end(), source.begin(), source.end());
-    
-    source.list_begin = source.list_end;
-    source.list_end.ptr->prev = nullptr;
-    source.list_size = 0;
+    source.reset();
   }
   ~List() {
     this->clear();
@@ -402,15 +406,12 @@ class List {
       while (it_this != this->end() && !((*it_other) < (*it_this)))
         ++it_this;
       
-      auto nxt = it_other;
-      ++nxt;
-      this->insert_previous(it_this, it_other);
-      it_other = nxt;
+      auto it = it_other;
+      ++it_other;
+      this->insert_previous(it_this, it);
     }
     
-    other.list_begin = other.list_end;
-    other.list_end.ptr->prev = nullptr;
-    other.list_size = 0;
+    other.reset();
   }
   /// Merge 2 lists sorted in ascending order.
   void merge(List<T>& other,
@@ -426,12 +427,23 @@ class List {
       it_other = nxt;
     }
     
-    other.list_begin = other.list_end;
-    other.list_end.ptr->prev = nullptr;
-    other.list_size = 0;
+    other.reset();
   }
   void sort() {
-    /// TODO
+    if (this->size() > 1) {
+      auto mid = this->get_iterator(this->size() / 2);
+      List<T> l1, l2;
+      l1.move_previous(l1.end(), this->begin(), mid);
+      l2.move_previous(l2.end(), mid, this->end());
+      this->reset();
+      
+      l1.sort();
+      l2.sort();
+      
+      this->move_previous(this->end(), l1.begin(), l1.end());
+      l1.reset();
+      this->merge(l2);
+    }
   }
   void clear() {
     if (!this->empty()) {
@@ -442,9 +454,7 @@ class List {
       }
     }
 
-    list_begin = list_end;
-    list_end.ptr->prev = nullptr;
-    this->list_size = 0;
+    this->reset();
   }
   
   /// Exception(s): undefined behavior: null pointer dereference
@@ -592,10 +602,7 @@ class List {
     if (this != &source) {
       this->clear();
       move_previous(this->end(), source.begin(), source.end());
-      
-      source.list_begin = source.list_end;
-      source.list_end.ptr->prev = nullptr;
-      source.list_size = 0;
+      source.reset();
     }
     
     return *this;
