@@ -3,6 +3,7 @@
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
@@ -22,7 +23,7 @@ class List {
  private:
   iterator list_begin, list_end;
   int list_size;
-  
+
   void reset() {
     this->list_begin = this->list_end;
     this->list_end.ptr->prev = nullptr;
@@ -36,40 +37,39 @@ class List {
     p_prev->next = node;
     p_prev->prev = node->prev;
     p_prev->next->prev = p_prev;
-    if (p_prev->prev)
-      p_prev->prev->next = p_prev;
+    if (p_prev->prev) p_prev->prev->next = p_prev;
 
     if (it == this->begin()) list_begin = p_prev;
 
     ++this->list_size;
   }
   /// Move nodes from a list of range [`first`, `last`) before `it`.
-  /// Return iterator pointing to the first inserted value, or `pos` if `first` == `last`.
-  /// Exception(s): undefined behavior: null pointer dereference
-  iterator move_previous(const iterator& pos,
-                  const iterator& first,
-                  const iterator& last) {
+  /// Return iterator pointing to the first inserted value, or `pos` if
+  /// `first`
+  /// == `last`. Exception(s): undefined behavior: null pointer dereference
+
+  iterator move_previous(const iterator& pos, const iterator& first,
+                         const iterator& last) {
     list_size += std::distance(first, last);
-    
-    auto prev = pos; --prev;
-    
+
+    auto prev = pos;
+    --prev;
+
     if (first != last) {
       auto node = pos.ptr;
       auto node_first = first.ptr;
       auto node_last = last.ptr->prev;
-      
+
       node_first->prev = node->prev;
-      if (node->prev)
-        node->prev->next = node_first;
-      
+      if (node->prev) node->prev->next = node_first;
+
       node_last->next = node;
       node->prev = node_last;
-      
-      if (this->begin() == pos)
-        list_begin = first;
+
+      if (this->begin() == pos) list_begin = first;
     }
-    
-    return prev == nullptr? this->begin() : ++prev;
+
+    return prev == nullptr ? this->begin() : ++prev;
   }
   /// Delete the node at `it` tfrom list.
   /// Make sure `it` belongs to this list and not its end.
@@ -79,7 +79,7 @@ class List {
     if (it == this->end()) {
       throw std::out_of_range("Trying to get access to end pointer.");
     }
-    
+
     Node<T>* node = it.ptr;
 
     if (node->next) {
@@ -98,11 +98,11 @@ class List {
     node = node->next;
     delete it.ptr;
     it.ptr = nullptr;
-    
+
     return node;
   }
   /// Exception(s): out of range
-  iterator get_iterator(const int index) {
+  iterator get_iterator(const int& index) {
     if (index < 0 || index >= this->size()) {
       throw std::out_of_range("List of size " + std::to_string(this->size()) +
                               " is out of range at index " +
@@ -121,7 +121,7 @@ class List {
     return it;
   }
   /// Exception(s): out of range
-  const_iterator get_iterator(const int index) const {
+  const_iterator get_iterator(const int& index) const {
     if (index < 0 || index >= this->size()) {
       throw std::out_of_range("List of size " + std::to_string(this->size()) +
                               " is out of range at index " +
@@ -141,9 +141,7 @@ class List {
   }
 
  public:
-  List() : list_size{0} {
-    list_begin = list_end = new Node<T>();
-  }
+  List() : list_size{0} { list_begin = list_end = new Node<T>(); }
   List(const std::initializer_list<T>& source) : list_size{0} {
     list_begin = list_end = new Node<T>();
     for (const auto& x : source) this->push_back(x);
@@ -198,16 +196,16 @@ class List {
   }
   /// Allow modifications, i.e. `list[0] = sth;`
   /// Exception(s): out of range
-  T& operator[](const int index) { return *get_iterator(index); }
+  T& operator[](const int& index) { return *get_iterator(index); }
   /// Do not allow modifications.
   /// Exception(s): out of range
-  const T& operator[](const int index) const { return *get_iterator(index); }
+  const T& operator[](const int& index) const { return *get_iterator(index); }
   /// Allow modifications, i.e. `list.at(0) = sth;`
   /// Exception(s): out of range
-  T& at(const int index) { return (*this)[index]; }
+  T& at(const int& index) { return (*this)[index]; }
   /// Do not allow modifications.
   /// Exception(s): out of range
-  const T& at(const int index) const { return (*this)[index]; }
+  const T& at(const int& index) const { return (*this)[index]; }
 
   void push_front(const T& value) {
     Node<T>* new_node = new Node<T>(value);
@@ -230,151 +228,139 @@ class List {
   /// `value` will be at `index` in resulting list.
   /// Return iterator pointing to the inserted value
   /// Exception(s): out of range=
-  iterator insert_at(const int index,
-                     const T& value) {
+  iterator insert_at(const int& index, const T& value) {
     if (index == 0) {
       this->push_front(value);
-      
+
       return this->begin();
-    }
-    else if (index == this->size()) {
+    } else if (index == this->size()) {
       this->push_back(value);
-      
+
       return --this->end();
     } else {
       auto it_new = iterator(new Node<T>(value));
       auto it = this->get_iterator(index);
 
       this->insert_previous(it, it_new);
-      
+
       return it_new;
     }
   }
   /// Insert `value` before `pos`.
   /// Return iterator pointing to the inserted value
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator insert(const iterator& pos,
-                  const T& value) {
+  iterator insert(const iterator& pos, const T& value) {
     auto it_new = iterator(new Node<T>(value));
     insert_previous(pos, it_new);
-    
+
     return it_new;
   }
   /// Insert count copies of `value` before `pos`.
-  /// Return iterator pointing to the inserted value, or `pos` if `count` == 0.
-  /// Exception(s): undefined behavior: null pointer dereference
-  iterator insert(const iterator& pos,
-                  const int count,
-                  const T& value) {
-    auto prev = pos; --prev;
-    
-    for(int i = 0; i < count; i++) {
+  /// Return iterator pointing to the inserted value, or `pos` if `count` ==
+  /// 0. Exception(s): undefined behavior: null pointer dereference
+  iterator insert(const iterator& pos, const int& count, const T& value) {
+    auto prev = pos;
+    --prev;
+
+    for (int i = 0; i < count; i++) {
       auto it_new = iterator(new Node<T>(value));
       insert_previous(pos, it_new);
     }
-    
-    return prev == nullptr? this->begin() : ++prev;
+
+    return prev == nullptr ? this->begin() : ++prev;
   }
-  /// `first` and `last` must not be part of this list. `last` must be reachable by `first`.
-  /// Insert elements from a list of range [`first`, `last`) before `it`.
-  /// Return iterator pointing to the first inserted value, or `pos` if `first` == `last`.
-  /// Exception(s): undefined behavior: null pointer dereference
-  iterator insert(const iterator& pos,
-                  const const_iterator& first,
+  /// `first` and `last` must not be part of this list. `last` must be
+  /// reachable by `first`. Insert elements from a list of range [`first`,
+  /// `last`) before `it`. Return iterator pointing to the first inserted
+  /// value, or `pos` if `first` == `last`. Exception(s): undefined behavior:
+  /// null pointer dereference
+  iterator insert(const iterator& pos, const const_iterator& first,
                   const const_iterator& last) {
-    auto prev = pos; --prev;
-    
-    for(auto it = first; it != last; ++it)
-      this->insert(pos, (*it));
-    
-    return prev == nullptr? this->begin() : ++prev;
+    auto prev = pos;
+    --prev;
+
+    for (auto it = first; it != last; ++it) this->insert(pos, (*it));
+
+    return prev == nullptr ? this->begin() : ++prev;
   }
   /// Return iterator at the new element at `index`.
   /// Exception(s): out of range
-  iterator remove_at(const int index) {
+  iterator remove_at(const int& index) {
     auto it = this->get_iterator(index);
     return this->remove(it);
   }
   /// Return resulting size.
   int remove(const T& value) {
-    for(auto it = this->begin(); it != this->end();) {
+    for (auto it = this->begin(); it != this->end();) {
       if ((*it) == value)
         it = this->remove(it);
       else
         ++it;
     }
-    
+
     return this->size();
   }
   /// Return resulting size.
   int remove_if(std::function<bool(const T&)> func) {
-    for(auto it = this->begin(); it != this->end();) {
+    for (auto it = this->begin(); it != this->end();) {
       if (func(*it))
         it = this->remove(it);
       else
         ++it;
     }
-    
+
     return this->size();
   }
-  void resize(const int count) {
-    while (this->size() < count)
-      this->push_back(T());
-    
-    while (count < this->size())
-      this->pop_back();
+  void resize(const int& count) {
+    while (this->size() < count) this->push_back(T());
+
+    while (count < this->size()) this->pop_back();
   }
-  void resize(const int count,
-              const T& value) {
-    while (this->size() < count)
-      this->push_back(value);
-    
-    while (count < this->size())
-      this->pop_back();
+  void resize(const int& count, const T& value) {
+    while (this->size() < count) this->push_back(value);
+
+    while (count < this->size()) this->pop_back();
   }
   /// Replace the contents with `count` copies of `value`.
-  void assign(const int count, const T& value) {
+  void assign(const int& count, const T& value) {
     this->resize(count);
-    for(auto it = this->begin(); it != this->end(); ++it)
-      (*it) = value;
+    for (auto it = this->begin(); it != this->end(); ++it) (*it) = value;
   }
-  /// `first` and `last` must not be part of this list. `last` must be reachable by `first`.
-  /// Replace the contents with copies of those in the range [`first`, `last`).
-  void assign(const const_iterator& first,
-              const const_iterator& last) {
+  /// `first` and `last` must not be part of this list. `last` must be
+  /// reachable by `first`. Replace the contents with copies of those in the
+  /// range
+  /// [`first`, `last`).
+  void assign(const const_iterator& first, const const_iterator& last) {
     this->resize(std::distance(first, last));
-    
+
     auto it_other = first;
-    for(auto it = this->begin(); it != this->end(); ++it, ++it_other)
+    for (auto it = this->begin(); it != this->end(); ++it, ++it_other)
       (*it) = (*it_other);
   }
-  /// Replace the contents with the elements from the initializer list `source`.
+  /// Replace the contents with the elements from the initializer list
+  /// `source`.
   void assign(const std::initializer_list<T>& source) {
     this->resize(source.size());
-    
+
     auto it_other = source.begin();
-    for(auto it = this->begin(); it != this->end(); ++it, ++it_other)
+    for (auto it = this->begin(); it != this->end(); ++it, ++it_other)
       (*it) = (*it_other);
   }
   /// Return resulting size.
   int unique() {
-    auto last = --std::unique(this->begin(), this->end());
-    while (--this->end() != last)
-      this->pop_back();
-    
+    auto last = std::unique(this->begin(), this->end());
+    this->resize(std::distance(this->begin(), last));
+
     return this->size();
   }
   /// Return resulting size.
   int unique(std::function<bool(const T&, const T&)> func) {
-    auto last = --std::unique(this->begin(), this->end(), func);
-    while (--this->end() != last)
-      this->pop_back();
-    
+    auto last = std::unique(this->begin(), this->end(), func);
+    this->resize(std::distance(this->begin(), last));
+
     return this->size();
   }
-  void reverse_value() {
-    std::reverse(this->begin(), this->end());
-  }
+  void reverse_value() { std::reverse(this->begin(), this->end()); }
   void reverse() {
     if (!this->empty()) {
       for (auto it = this->begin(), it_next = this->begin(); it != this->end();
@@ -401,32 +387,30 @@ class List {
   }
   /// Merge 2 lists sorted in ascending order.
   void merge(List<T>& other) {
-    for(auto it_this = this->begin(), it_other = other.begin();
-        it_other != other.end();) {
-      while (it_this != this->end() && !((*it_other) < (*it_this)))
-        ++it_this;
-      
+    for (auto it_this = this->begin(), it_other = other.begin();
+         it_other != other.end();) {
+      while (it_this != this->end() && !((*it_other) < (*it_this))) ++it_this;
+
       auto it = it_other;
       ++it_other;
       this->insert_previous(it_this, it);
     }
-    
+
     other.reset();
   }
   /// Merge 2 lists sorted in ascending order.
-  void merge(List<T>& other,
-             std::function<bool(const T&, const T&)> comp) {
-    for(auto it_this = this->begin(), it_other = other.begin();
-        it_other != other.end();) {
+  void merge(List<T>& other, std::function<bool(const T&, const T&)> comp) {
+    for (auto it_this = this->begin(), it_other = other.begin();
+         it_other != other.end();) {
       while (it_this != this->end() && !(comp((*it_other), (*it_this))))
         ++it_this;
-      
+
       auto nxt = it_other;
       ++nxt;
       this->insert_previous(it_this, it_other);
       it_other = nxt;
     }
-    
+
     other.reset();
   }
   void sort() {
@@ -436,10 +420,10 @@ class List {
       l1.move_previous(l1.end(), this->begin(), mid);
       l2.move_previous(l2.end(), mid, this->end());
       this->reset();
-      
+
       l1.sort();
       l2.sort();
-      
+
       this->move_previous(this->end(), l1.begin(), l1.end());
       l1.reset();
       this->merge(l2);
@@ -452,10 +436,10 @@ class List {
       l1.move_previous(l1.end(), this->begin(), mid);
       l2.move_previous(l2.end(), mid, this->end());
       this->reset();
-      
+
       l1.sort(comp);
       l2.sort(comp);
-      
+
       this->move_previous(this->end(), l1.begin(), l1.end());
       l1.reset();
       this->merge(l2, comp);
@@ -472,30 +456,28 @@ class List {
 
     this->reset();
   }
-  
+
   /// Exception(s): undefined behavior: null pointer dereference
-  const_iterator find(const T& value,
-                      const const_iterator& begin = nullptr,
+  const_iterator find(const T& value, const const_iterator& begin = nullptr,
                       const const_iterator& end = nullptr) const {
     auto current_begin = begin == nullptr ? this->begin() : begin;
     auto current_end = end == nullptr ? this->end() : end;
 
     auto it = std::find(current_begin, current_end, value);
-    
+
     if (it == current_end)
       return this->end();
     else
       return it;
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find(const T& value,
-                const iterator& begin = nullptr,
+  iterator find(const T& value, const iterator& begin = nullptr,
                 const iterator& end = nullptr) {
     auto current_begin = begin == nullptr ? this->begin() : begin;
     auto current_end = end == nullptr ? this->end() : end;
 
     auto it = std::find(current_begin, current_end, value);
-    
+
     if (it == current_end)
       return this->end();
     else
@@ -509,7 +491,7 @@ class List {
     auto current_end = end == nullptr ? this->end() : end;
 
     auto it = std::find_if(current_begin, current_end, func);
-    
+
     if (it == current_end)
       return this->end();
     else
@@ -523,14 +505,14 @@ class List {
     auto current_end = end == nullptr ? this->end() : end;
 
     auto it = std::find_if(current_begin, current_end, func);
-    
+
     if (it == current_end)
       return this->end();
     else
       return it;
   }
   int count(const T& value, const const_iterator& begin = nullptr,
-                      const const_iterator& end = nullptr) const {
+            const const_iterator& end = nullptr) const {
     auto current_begin = begin == nullptr ? this->begin() : begin;
     auto current_end = end == nullptr ? this->end() : end;
 
@@ -589,8 +571,7 @@ class List {
       return it;
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find_last(const T& value,
-                     const iterator& begin = nullptr,
+  iterator find_last(const T& value, const iterator& begin = nullptr,
                      const iterator& end = nullptr) {
     auto rbegin = end == nullptr ? this->end() : end;
     --rbegin;
@@ -608,26 +589,28 @@ class List {
       return it;
   }
 
-  
-  
+  List<T>& operator=(const std::initializer_list<T>& source) {
+    assign(source);
+    return *this;
+  }
+
   List<T>& operator=(const List<T>& source) {
     if (this == &source) return *this;
     assign(source.begin(), source.end());
+    return *this;
   }
   List<T>& operator=(List<T>&& source) {
-    if (this != &source) {
-      this->clear();
-      move_previous(this->end(), source.begin(), source.end());
-      source.reset();
-    }
-    
+    if (this == &source) return *this;
+    this->clear();
+    move_previous(this->end(), source.begin(), source.end());
+    source.reset();
     return *this;
   }
 };
 
 template <class T>
-class List<T>::iterator
-    : public std::iterator<std::bidirectional_iterator_tag, T, std::ptrdiff_t, T*, T&> {
+class List<T>::iterator : public std::iterator<std::bidirectional_iterator_tag,
+                                               T, std::ptrdiff_t, T*, T&> {
   friend class List;
 
  private:
@@ -674,14 +657,34 @@ class List<T>::iterator
     ptr = p;
     return *this;
   }
-
+  iterator operator+(const int& step) {
+    iterator it = *this;
+    if (step > 0) {
+      for (int i = 0; i < step; ++i) ++it;
+    }
+    if (step < 0) {
+      for (int i = 0; i < -step; ++i) --it;
+    }
+    return it;
+  }
+  iterator operator-(const int& step) {
+    iterator it = *this;
+    if (step > 0) {
+      for (int i = 0; i < step; ++i) --it;
+    }
+    if (step < 0) {
+      for (int i = 0; i < -step; ++i) ++it;
+    }
+    return it;
+  }
   bool operator==(const iterator& it) const { return it.ptr == ptr; }
   bool operator!=(const iterator& it) const { return it.ptr != ptr; }
 };
 
 template <class T>
 class List<T>::const_iterator
-    : public std::iterator<std::bidirectional_iterator_tag, T, std::ptrdiff_t, T*, T&> {
+    : public std::iterator<std::bidirectional_iterator_tag, T, std::ptrdiff_t,
+                           T*, T&> {
   friend class List;
 
  private:
@@ -725,6 +728,26 @@ class List<T>::const_iterator
     const_iterator tmp = *this;
     --(*this);
     return tmp;
+  }
+  const_iterator operator+(const int& step) {
+    const_iterator it = *this;
+    if (step > 0) {
+      for (int i = 0; i < step; ++i) ++it;
+    }
+    if (step < 0) {
+      for (int i = 0; i < -step; ++i) --it;
+    }
+    return it;
+  }
+  const_iterator operator-(const int& step) {
+    const_iterator it = *this;
+    if (step > 0) {
+      for (int i = 0; i < step; ++i) --it;
+    }
+    if (step < 0) {
+      for (int i = 0; i < -step; ++i) ++it;
+    }
+    return it;
   }
   const_iterator& operator=(Node<value_type>* const& p) {
     ptr = p;

@@ -1,7 +1,8 @@
 #include <iostream>
+// #include <list>
 #include <string>
 #include <vector>
-#include <list>
+
 #include "DoublyLinkedList.h"
 
 void output(const List<int>& list) {
@@ -23,10 +24,17 @@ struct coord {
 };
 
 int main(int argc, const char* argv[]) {
-  std::list<int> l{3,2,1};
-  l.sort();
-  
+  // std::list<int> l{3, 2, 1};
+  // l.sort();
   List<int>&& list{1, 2, 3};
+  List<int>::iterator it = list.begin() + 1;
+  std::cout << *it << '\n';
+  std::cout << *(it + 1) << '\n';
+  std::cout << *(it + -1) << '\n';
+  std::cout << *(it) << '\n';
+  std::cout << *(it - 1) << '\n';
+  std::cout << *(list.end() - 2) << '\n';
+  std::cout << *list.end() << '\n';
   std::cout << list.size() << ' ' << std::distance(list.begin(), list.end())
             << '\n';
   // 1 2 3
@@ -42,7 +50,7 @@ int main(int argc, const char* argv[]) {
   list.insert_at(0, -1);
   // -1 0 1 2 3 4 5 6
   output(list);
-  
+
   list.remove_at(0);
   list.remove_at(list.size() - 1);
   // 0 1 2 3 4 5
@@ -80,70 +88,70 @@ int main(int argc, const char* argv[]) {
   // empty
   // error at list.front()
   // output(list);
-  
-  list = { 1,2,3,4,5,6 };
+
+  list = {1, 2, 3, 4, 5, 6};
   // 1 2 3 4 5 6
   output(list);
-  
+
   list.pop_front();
   list.pop_back();
   // 2 3 4 5
   output(list);
-  
+
   list.insert(list.begin(), 1);
   list.insert(++list.begin(), 3);
   list.insert(list.end(), 6);
   // 1 3 2 3 4 5 6
   output(list);
-  
+
   list.insert(list.begin(), 2, 0);
   list.insert(list.end(), 3, 7);
   // 0 0 1 3 2 3 4 5 6 7 7 7
   output(list);
-  
+
   list.insert(--list.end(), list.begin(), ++(++list.begin()));
   // 0 0 1 3 2 3 4 5 6 7 7 0 0 7
   output(list);
-  
+
   list.remove(3);
   // 0 0 1 2 4 5 6 7 7 0 0 7
   output(list);
-  
+
   list.remove_if([](int x) { return x == 7; });
   // 0 0 1 2 4 5 6 0 0
   output(list);
-  
+
   list.resize(11, 10);
   // 0 0 1 2 4 5 6 0 0 10 10
   output(list);
-  
-  list.unique([] (int x, int y) { return x == y; });
+
+  list.unique([](int x, int y) { return x == y; });
   // 0 1 2 4 5 6 0 10
   output(list);
-  
+
   list.remove_at(6);
   // 0 1 2 4 5 6 10
   output(list);
-  
-  List<int> l2 = { 3,7,8,9,11 };
+
+  List<int> l2 = {3, 7, 8, 9, 11};
   list.merge(l2, [](int x, int y) { return x < y; });
   // 0 1 2 3 4 5 6 7 8 9 10 11
   output(list);
   // empty
   // error at l2.back()
   // output(l2);
-  
+
   l2.assign(10, 1);
   // 1 1 1 1 1 1 1 1 1 1
   output(l2);
-  
+
   l2.assign(++list.begin(), list.end());
   // 1 2 3 4 5 6 7 8 9 10 11
   output(l2);
-  
-  l2.assign({4, 3, 1, 2, 7, 9, 8, 6, 5});
+
+  l2 = {4, 3, 1, 2, 7, 9, 8, 6, 5};
   l2.sort([](int x, int y) { return x > y; });
-  // 1 2 3 4 5 6 7 8 9
+  // 9 8 7 6 5 4 3 2 1
   output(l2);
 
   List<std::string> ll{"acd", "cde", "acc"};
