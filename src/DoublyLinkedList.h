@@ -589,6 +589,19 @@ class List {
       return it;
   }
 
+  void for_each(std::function<void(const T&)> func,
+                const const_iterator& begin = nullptr,
+                const const_iterator& end = nullptr) const {
+    auto current_begin = begin == nullptr ? this->begin() : begin;
+    auto current_end = end == nullptr ? this->end() : end;
+    std::for_each(current_begin, current_end, func);
+  }
+  void for_each(std::function<void(T&)> func, const iterator& begin = nullptr,
+                const iterator& end = nullptr) {
+    auto current_begin = begin == nullptr ? this->begin() : begin;
+    auto current_end = end == nullptr ? this->end() : end;
+    std::for_each(current_begin, current_end, func);
+  }
   List<T>& operator=(const std::initializer_list<T>& source) {
     assign(source);
     return *this;

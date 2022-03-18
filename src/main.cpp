@@ -108,7 +108,11 @@ int main(int argc, const char* argv[]) {
   list.insert(list.end(), 3, 7);
   // 0 0 1 3 2 3 4 5 6 7 7 7
   output(list);
-
+  std::cout << "--------------------------------\n";
+  list.for_each([](int& x) -> void { x++; });
+  list.for_each([](const int& x) -> void { std::cout << x << ' '; });
+  std::cout << '\n';
+  output(list);
   list.insert(--list.end(), list.begin(), ++(++list.begin()));
   // 0 0 1 3 2 3 4 5 6 7 7 0 0 7
   output(list);
