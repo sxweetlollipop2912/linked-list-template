@@ -342,7 +342,7 @@ class List {
   /// Replace the contents with copies of those in the range [`first`, `last`).
   void assign(const const_iterator& first,
               const const_iterator& last) {
-    this->resize(std::distance(first, last));
+    this->resize((int)std::distance(first, last));
     
     auto it_other = first;
     for(auto it = this->begin(); it != this->end(); ++it, ++it_other)
@@ -350,7 +350,7 @@ class List {
   }
   /// Replace the contents with the elements from the initializer list `source`.
   void assign(const std::initializer_list<T>& source) {
-    this->resize(source.size());
+    this->resize((int)source.size());
     
     auto it_other = source.begin();
     for(auto it = this->begin(); it != this->end(); ++it, ++it_other)
@@ -460,6 +460,19 @@ class List {
       l1.reset();
       this->merge(l2, comp);
     }
+  }
+  int filter(std::function<bool(const T&)> func,
+              const iterator& begin = nullptr,
+              const iterator& end = nullptr) {
+    auto current_begin = begin == nullptr ? this->begin() : begin;
+    auto current_end = end == nullptr ? this->end() : end;
+    
+    for(auto it = current_begin; it != current_end;) {
+      if (!func(*it)) it = this->remove(it);
+      else ++it;
+    }
+    
+    return this->size();
   }
   void clear() {
     if (!this->empty()) {

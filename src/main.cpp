@@ -145,6 +145,10 @@ int main(int argc, const char* argv[]) {
   l2.sort([](int x, int y) { return x > y; });
   // 1 2 3 4 5 6 7 8 9
   output(l2);
+  
+  l2.filter([](const int x) { return x % 3 == 0; });
+  // 9 6 3
+  output(l2);
 
   List<std::string> ll{"acd", "cde", "acc"};
   // false
