@@ -154,7 +154,7 @@ class List {
   List(const const_iterator& begin, const const_iterator& end) : list_size{0} {
     list_begin = list_end = new Node<T>();
 
-    for (auto it = begin; it != end; ++it) this->push_back((*it));
+    for (auto it = begin; it != end; ++it) this->push_back(*it);
   }
   List(List<T>&& source) {
     list_begin = list_end = new Node<T>();
@@ -326,12 +326,12 @@ class List {
     this->resize(count);
     for (auto it = this->begin(); it != this->end(); ++it) (*it) = value;
   }
-  /// `first` and `last` must not be part of this list. `last` must be reachable by `first`.
-  /// Replace the contents with copies of those in the range [`first`, `last`).
-  void assign(const const_iterator& first,
-              const const_iterator& last) {
+  /// `first` and `last` must not be part of this list. `last` must be reachable
+  /// by `first`. Replace the contents with copies of those in the range
+  /// [`first`, `last`).
+  void assign(const const_iterator& first, const const_iterator& last) {
     this->resize((int)std::distance(first, last));
-    
+
     auto it_other = first;
     for (auto it = this->begin(); it != this->end(); ++it, ++it_other)
       (*it) = (*it_other);
@@ -340,7 +340,7 @@ class List {
   /// `source`.
   void assign(const std::initializer_list<T>& source) {
     this->resize((int)source.size());
-    
+
     auto it_other = source.begin();
     for (auto it = this->begin(); it != this->end(); ++it, ++it_other)
       (*it) = (*it_other);
@@ -445,16 +445,17 @@ class List {
     }
   }
   int filter(std::function<bool(const T&)> func,
-              const iterator& begin = nullptr,
-              const iterator& end = nullptr) {
+             const iterator& begin = nullptr, const iterator& end = nullptr) {
     auto current_begin = begin == nullptr ? this->begin() : begin;
     auto current_end = end == nullptr ? this->end() : end;
-    
-    for(auto it = current_begin; it != current_end;) {
-      if (!func(*it)) it = this->remove(it);
-      else ++it;
+
+    for (auto it = current_begin; it != current_end;) {
+      if (!func(*it))
+        it = this->remove(it);
+      else
+        ++it;
     }
-    
+
     return this->size();
   }
   void clear() {
