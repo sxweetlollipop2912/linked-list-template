@@ -444,19 +444,18 @@ class List {
       this->merge(l2, comp);
     }
   }
-  int filter(std::function<bool(const T&)> func,
-             const iterator& begin = nullptr, const iterator& end = nullptr) {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    for (auto it = current_begin; it != current_end;) {
+  int filter(std::function<bool(const T&)> func, const iterator& begin,
+             const iterator& end) {
+    for (auto it = begin; it != end;)
       if (!func(*it))
         it = this->remove(it);
       else
         ++it;
-    }
 
     return this->size();
+  }
+  int filter(std::function<bool(const T&)> func) {
+    return filter(func, this->begin(), this->end());
   }
   void clear() {
     if (!this->empty()) {
@@ -524,45 +523,44 @@ class List {
     else
       return it;
   }
-  int count(const T& value, const const_iterator& begin = nullptr,
-            const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    return std::count(current_begin, current_end, value);
+  int count(const T& value, const const_iterator& begin,
+            const const_iterator& end) const {
+    return std::count(begin, end, value);
+  }
+  int count(const T& value) const {
+    return this->count(this->begin(), this->end(), value);
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  int count_if(std::function<bool(const T&)> func,
-               const const_iterator& begin = nullptr,
-               const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    return (int)std::count_if(current_begin, current_end, func);
+  int count_if(std::function<bool(const T&)> func, const const_iterator& begin,
+               const const_iterator& end) const {
+    return (int)std::count_if(begin, end, func);
+  }
+  int count_if(std::function<bool(const T&)> func) const {
+    return this->count_if(func, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  bool all_of(std::function<bool(const T&)> func,
-              const const_iterator& begin = nullptr,
-              const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    return std::all_of(current_begin, current_end, func);
+  bool all_of(std::function<bool(const T&)> func, const const_iterator& begin,
+              const const_iterator& end) const {
+    return std::all_of(begin, end, func);
+  }
+  bool all_of(std::function<bool(const T&)> func) const {
+    return this->all_of(func, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  bool any_of(std::function<bool(const T&)> func,
-              const const_iterator& begin = nullptr,
-              const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    return std::any_of(current_begin, current_end, func);
+  bool any_of(std::function<bool(const T&)> func, const const_iterator& begin,
+              const const_iterator& end) const {
+    return std::any_of(begin, end, func);
+  }
+  bool any_of(std::function<bool(const T&)> func) const {
+    return this->any_of(func, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  bool none_of(std::function<bool(const T&)> func,
-               const const_iterator& begin = nullptr,
-               const const_iterator& end = nullptr) const {
-    return !any_of(func, begin, end);
+  bool none_of(std::function<bool(const T&)> func, const const_iterator& begin,
+               const const_iterator& end) const {
+    return none_of(func, begin, end);
+  }
+  bool none_of(std::function<bool(const T&)> func) const {
+    return this->none_of(func, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
   const_iterator find_last(const T& value,
@@ -602,18 +600,19 @@ class List {
       return it;
   }
 
-  void for_each(std::function<void(const T&)> func,
-                const const_iterator& begin = nullptr,
-                const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-    std::for_each(current_begin, current_end, func);
+  void for_each(std::function<void(const T&)> func, const const_iterator& begin,
+                const const_iterator& end) const {
+    std::for_each(begin, end, func);
   }
-  void for_each(std::function<void(T&)> func, const iterator& begin = nullptr,
-                const iterator& end = nullptr) {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-    std::for_each(current_begin, current_end, func);
+  void for_each(std::function<void(const T&)> func) const {
+    this->for_each(func, this->begin(), this->end());
+  }
+  void for_each(std::function<void(T&)> func, const iterator& begin,
+                const iterator& end) {
+    std::for_each(begin, end, func);
+  }
+  void for_each(std::function<void(T&)> func) {
+    this->for_each(func, this->begin(), this->end());
   }
   List<T>& operator=(const std::initializer_list<T>& source) {
     assign(source);
