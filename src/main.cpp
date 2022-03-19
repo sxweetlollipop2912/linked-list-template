@@ -157,7 +157,7 @@ int main(int argc, const char* argv[]) {
   l2.sort([](int x, int y) { return x > y; });
   // 9 8 7 6 5 4 3 2 1
   output(l2);
-  
+
   l2.filter([](const int x) { return x % 3 == 0; });
   // 9 6 3
   output(l2);

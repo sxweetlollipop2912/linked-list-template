@@ -470,58 +470,36 @@ class List {
   }
 
   /// Exception(s): undefined behavior: null pointer dereference
-  const_iterator find(const T& value, const const_iterator& begin = nullptr,
-                      const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    auto it = std::find(current_begin, current_end, value);
-
-    if (it == current_end)
-      return this->end();
-    else
-      return it;
+  const_iterator find(const T& value, const const_iterator& begin,
+                      const const_iterator& end) const {
+    return std::find(begin, end, value);
+  }
+  const_iterator find(const T& value) const {
+    return this->find(value, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find(const T& value, const iterator& begin = nullptr,
-                const iterator& end = nullptr) {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    auto it = std::find(current_begin, current_end, value);
-
-    if (it == current_end)
-      return this->end();
-    else
-      return it;
+  iterator find(const T& value, const iterator& begin, const iterator& end) {
+    return std::find(begin, end, value);
+  }
+  iterator find(const T& value) {
+    return this->find(value, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
   const_iterator find_if(std::function<bool(const T&)> func,
-                         const const_iterator& begin = nullptr,
-                         const const_iterator& end = nullptr) const {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    auto it = std::find_if(current_begin, current_end, func);
-
-    if (it == current_end)
-      return this->end();
-    else
-      return it;
+                         const const_iterator& begin,
+                         const const_iterator& end) const {
+    return std::find_if(begin, end, func);
+  }
+  const_iterator find_if(std::function<bool(const T&)> func) const {
+    return this->find_if(func, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
-  iterator find_if(std::function<bool(const T&)> func,
-                   const iterator& begin = nullptr,
-                   const iterator& end = nullptr) {
-    auto current_begin = begin == nullptr ? this->begin() : begin;
-    auto current_end = end == nullptr ? this->end() : end;
-
-    auto it = std::find_if(current_begin, current_end, func);
-
-    if (it == current_end)
-      return this->end();
-    else
-      return it;
+  iterator find_if(std::function<bool(const T&)> func, const iterator& begin,
+                   const iterator& end) {
+    return std::find_if(begin, end, func);
+  }
+  iterator find_if(std::function<bool(const T&)> func) {
+    return this->find_if(func, this->begin(), this->end());
   }
   int count(const T& value, const const_iterator& begin,
             const const_iterator& end) const {
@@ -557,7 +535,7 @@ class List {
   /// Exception(s): undefined behavior: null pointer dereference
   bool none_of(std::function<bool(const T&)> func, const const_iterator& begin,
                const const_iterator& end) const {
-    return none_of(func, begin, end);
+    return std::none_of(begin, end, func);
   }
   bool none_of(std::function<bool(const T&)> func) const {
     return this->none_of(func, this->begin(), this->end());
