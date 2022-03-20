@@ -71,36 +71,7 @@ class List {
 
     return prev == nullptr ? this->begin() : ++prev;
   }
-  /// Delete the node at `it` tfrom list.
-  /// Make sure `it` belongs to this list and not its end.
-  /// Return iterator at the next element.
-  /// Exception(s): undefined behavior: null pointer dereference, out of range
-  iterator remove(iterator& it) {
-    if (it == this->end()) {
-      throw std::out_of_range("Trying to get access to end pointer.");
-    }
 
-    Node<T>* node = it.ptr;
-
-    if (node->next) {
-      node->next->prev = node->prev;
-    }
-    if (node->prev) {
-      node->prev->next = node->next;
-    }
-
-    if (this->begin() == it) {
-      ++list_begin;
-    }
-
-    --this->list_size;
-
-    node = node->next;
-    delete it.ptr;
-    it.ptr = nullptr;
-
-    return node;
-  }
   /// Exception(s): out of range
   iterator get_iterator(const int& index) {
     if (index < 0 || index >= this->size()) {
@@ -282,6 +253,35 @@ class List {
     for (auto it = first; it != last; ++it) this->insert(pos, (*it));
 
     return prev == nullptr ? this->begin() : ++prev;
+  }
+  /// Delete the node at `it` tfrom list.
+  /// Make sure `it` belongs to this list and not its end.
+  /// Return iterator at the next element.
+  /// Exception(s): undefined behavior: null pointer dereference, out of range
+  iterator remove(const iterator& it) {
+    if (it == this->end()) {
+      throw std::out_of_range("Trying to get access to end pointer.");
+    }
+
+    Node<T>* node = it.ptr;
+
+    if (node->next) {
+      node->next->prev = node->prev;
+    }
+    if (node->prev) {
+      node->prev->next = node->next;
+    }
+
+    if (this->begin() == it) {
+      ++list_begin;
+    }
+
+    --this->list_size;
+
+    node = node->next;
+    delete it.ptr;
+    // it.ptr = nullptr;
+    return node;
   }
   /// Return iterator at the new element at `index`.
   /// Exception(s): out of range
