@@ -554,7 +554,7 @@ class List {
     else
       return it;
   }
-
+  // for_each
   void for_each(std::function<void(const T&)> func, const const_iterator& begin,
                 const const_iterator& end) const {
     std::for_each(begin, end, func);
@@ -569,11 +569,11 @@ class List {
   void for_each(std::function<void(T&)> func) {
     this->for_each(func, this->begin(), this->end());
   }
+  // Assignment operator
   List<T>& operator=(const std::initializer_list<T>& source) {
     assign(source);
     return *this;
   }
-
   List<T>& operator=(const List<T>& source) {
     if (this == &source) return *this;
     assign(source.begin(), source.end());
@@ -586,6 +586,7 @@ class List {
     source.reset();
     return *this;
   }
+  // swap
   void swap(List<T>& other) {
     std::swap(this->list_begin, other.list_begin);
     std::swap(this->list_end, other.list_end);
