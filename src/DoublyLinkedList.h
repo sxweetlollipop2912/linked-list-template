@@ -586,6 +586,11 @@ class List {
     source.reset();
     return *this;
   }
+  void swap(List<T>& other) {
+    std::swap(this->list_begin, other.list_begin);
+    std::swap(this->list_end, other.list_end);
+    std::swap(this->list_size, other.list_size);
+  }
 };
 
 template <class T>
@@ -659,6 +664,7 @@ class List<T>::iterator : public std::iterator<std::bidirectional_iterator_tag,
   }
   bool operator==(const iterator& it) const { return it.ptr == ptr; }
   bool operator!=(const iterator& it) const { return it.ptr != ptr; }
+  void swap(iterator& other) { std::swap(this->ptr, other.ptr); }
 };
 
 template <class T>
@@ -739,4 +745,5 @@ class List<T>::const_iterator
   }
   bool operator==(const const_iterator& it) const { return it.ptr == ptr; }
   bool operator!=(const const_iterator& it) const { return it.ptr != ptr; }
+  void swap(const_iterator& other) { std::swap(this->ptr, other.ptr); }
 };
