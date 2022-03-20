@@ -154,6 +154,8 @@ int main(int argc, const char* argv[]) {
   output(l2);
 
   l2 = {4, 3, 1, 2, 7, 9, 8, 6, 5};
+  l2.sort();
+  output(l2);
   l2.sort([](int x, int y) { return x > y; });
   // 9 8 7 6 5 4 3 2 1
   output(l2);

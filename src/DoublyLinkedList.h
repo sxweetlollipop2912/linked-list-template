@@ -386,23 +386,13 @@ class List {
   }
   /// Merge 2 lists sorted in ascending order.
   void merge(List<T>& other) {
-    for (auto it_this = this->begin(), it_other = other.begin();
-         it_other != other.end();) {
-      while (it_this != this->end() && !((*it_other) < (*it_this))) ++it_this;
-
-      auto it = it_other;
-      ++it_other;
-      this->insert_previous(it_this, it);
-    }
-
-    other.reset();
+    this->merge(other, [](const T& u, const T& v) { return u < v; });
   }
   /// Merge 2 lists sorted in ascending order.
   void merge(List<T>& other, std::function<bool(const T&, const T&)> comp) {
     for (auto it_this = this->begin(), it_other = other.begin();
          it_other != other.end();) {
-      while (it_this != this->end() && !(comp((*it_other), (*it_this))))
-        ++it_this;
+      while (it_this != this->end() && !comp(*it_other, *it_this)) ++it_this;
 
       auto nxt = it_other;
       ++nxt;
@@ -413,20 +403,7 @@ class List {
     other.reset();
   }
   void sort() {
-    if (this->size() > 1) {
-      auto mid = this->get_iterator(this->size() / 2);
-      List<T> l1, l2;
-      l1.move_previous(l1.end(), this->begin(), mid);
-      l2.move_previous(l2.end(), mid, this->end());
-      this->reset();
-
-      l1.sort();
-      l2.sort();
-
-      this->move_previous(this->end(), l1.begin(), l1.end());
-      l1.reset();
-      this->merge(l2);
-    }
+    this->sort([](const T& u, const T& v) { return u < v; });
   }
   void sort(std::function<bool(const T&, const T&)> comp) {
     if (this->size() > 1) {
