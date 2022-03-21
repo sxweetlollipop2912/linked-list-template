@@ -569,6 +569,12 @@ class List {
   void for_each(std::function<void(T&)> func) {
     this->for_each(func, this->begin(), this->end());
   }
+  template <class TT>
+  List<TT> map(std::function<TT(const T&)> func) const {
+    List<TT> res;
+    this->for_each([&](const T& x) { res.push_back(func(x)); });
+    return res;
+  }
   // Assignment operator
   List<T>& operator=(const std::initializer_list<T>& source) {
     assign(source);

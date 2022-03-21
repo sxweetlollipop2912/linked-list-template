@@ -185,4 +185,9 @@ int main(int argc, const char* argv[]) {
   // true
   std::cout << ll2.none_of([](const int& value) { return value % 2 != 0; })
             << '\n';
+  // MAPPPPPPPPPPPPPPPPPPP
+  List<int> tmp_list{1, 2, 3, 4, 5};
+  auto tmp_list2 = tmp_list.map<std::string>(
+      [](const int& x) { return "a[" + std::to_string(x) + "], "; });
+  tmp_list2.for_each([](const std::string& x) { std::cout << x; });
 }
