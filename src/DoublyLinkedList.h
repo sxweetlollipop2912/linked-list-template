@@ -115,12 +115,12 @@ class List {
   List() : list_size{0} { list_begin = list_end = new Node<T>(); }
   List(const std::initializer_list<T>& source) : list_size{0} {
     list_begin = list_end = new Node<T>();
-    for (const auto& x : source) this->push_back(x);
+    for (const auto& element : source) this->push_back(element);
   }
   List(const List<T>& source) : list_size{0} {
     list_begin = list_end = new Node<T>();
 
-    for (const auto& x : source) this->push_back(x);
+    for (const auto& element : source) this->push_back(element);
   }
   List(const const_iterator& begin, const const_iterator& end) : list_size{0} {
     list_begin = list_end = new Node<T>();
@@ -300,17 +300,6 @@ class List {
 
     return this->size();
   }
-  /// Return resulting size.
-  int remove_if(std::function<bool(const T&)> func) {
-    for (auto it = this->begin(); it != this->end();) {
-      if (func(*it))
-        it = this->remove(it);
-      else
-        ++it;
-    }
-
-    return this->size();
-  }
   void resize(const int& count) {
     while (this->size() < count) this->push_back(T());
 
@@ -421,8 +410,8 @@ class List {
       this->merge(l2, comp);
     }
   }
-  int filter(std::function<bool(const T&)> func, const iterator& begin,
-             const iterator& end) {
+  int remove_if(std::function<bool(const T&)> func, const iterator& begin,
+                const iterator& end) {
     for (auto it = begin; it != end;)
       if (!func(*it))
         it = this->remove(it);
@@ -431,8 +420,8 @@ class List {
 
     return this->size();
   }
-  int filter(std::function<bool(const T&)> func) {
-    return filter(func, this->begin(), this->end());
+  int remove_if(std::function<bool(const T&)> func) {
+    return remove_if(func, this->begin(), this->end());
   }
   void clear() {
     if (!this->empty()) {
@@ -517,43 +506,6 @@ class List {
   bool none_of(std::function<bool(const T&)> func) const {
     return this->none_of(func, this->begin(), this->end());
   }
-  /// Exception(s): undefined behavior: null pointer dereference
-  const_iterator find_last(const T& value,
-                           const const_iterator& begin = nullptr,
-                           const const_iterator& end = nullptr) const {
-    auto rbegin = end == nullptr ? this->end() : end;
-    --rbegin;
-
-    auto rend = begin == nullptr ? this->begin() : begin;
-    --rend;
-
-    auto it = rbegin;
-    for (; it != rend && (*it) != value; --it)
-      ;
-
-    if (it == rend)
-      return this->end();
-    else
-      return it;
-  }
-  /// Exception(s): undefined behavior: null pointer dereference
-  iterator find_last(const T& value, const iterator& begin = nullptr,
-                     const iterator& end = nullptr) {
-    auto rbegin = end == nullptr ? this->end() : end;
-    --rbegin;
-
-    auto rend = begin == nullptr ? this->begin() : begin;
-    --rend;
-
-    auto it = rbegin;
-    for (; it != rend && (*it) != value; --it)
-      ;
-
-    if (it == rend)
-      return this->end();
-    else
-      return it;
-  }
   // for_each
   void for_each(std::function<void(const T&)> func, const const_iterator& begin,
                 const const_iterator& end) const {
@@ -572,8 +524,27 @@ class List {
   template <class TT>
   List<TT> map(std::function<TT(const T&)> func) const {
     List<TT> res;
-    this->for_each([&](const T& x) { res.push_back(func(x)); });
+    for (const auto& element : *this) res.push_back(func(element));
     return res;
+  }
+  List<T> filter(std::function<bool(const T&)> func) const {
+    List<T> res;
+    for (const auto& element : *this)
+      if (func(element)) res.push_back(element);
+    return res;
+  }
+  T reduce(std::function<T(const T&, const T&)> func,
+           const T& initialValue) const {
+    T previousValue = initialValue;
+    for (const auto& currentValue : *this)
+      previousValue = func(previousValue, currentValue);
+    return previousValue;
+  }
+  T reduce(std::function<T(const T&, const T&)> func) const {
+    T previousValue = *(this->begin());
+    for (auto it = ++this->begin(); it != this->end(); ++it)
+      previousValue = func(previousValue, *it);
+    return previousValue;
   }
   // Assignment operator
   List<T>& operator=(const std::initializer_list<T>& source) {
