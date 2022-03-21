@@ -148,7 +148,7 @@ class List {
   /// Allow modifications
   /// Exception(s): undefined behavior: null pointer dereference
   T& front() { return *this->begin(); }
-  /// Does not allow modifications.
+  /// Do not allow modifications.
   /// Exception(s): undefined behavior: null pointer dereference
   const T& front() const { return *this->begin(); }
   /// Allow modifications
@@ -200,22 +200,9 @@ class List {
   /// Return iterator pointing to the inserted value
   /// Exception(s): out of range=
   iterator insert_at(const int& index, const T& value) {
-    if (index == 0) {
-      this->push_front(value);
-
-      return this->begin();
-    } else if (index == this->size()) {
-      this->push_back(value);
-
-      return --this->end();
-    } else {
-      auto it_new = iterator(new Node<T>(value));
-      auto it = this->get_iterator(index);
-
-      this->insert_previous(it, it_new);
-
-      return it_new;
-    }
+    auto it = this->get_iterator(index);
+    
+    return this->insert(it, value);
   }
   /// Insert `value` before `pos`.
   /// Return iterator pointing to the inserted value
@@ -232,11 +219,7 @@ class List {
   iterator insert(const iterator& pos, const int& count, const T& value) {
     auto prev = pos;
     --prev;
-
-    for (int i = 0; i < count; i++) {
-      auto it_new = iterator(new Node<T>(value));
-      insert_previous(pos, it_new);
-    }
+    for (int i = 0; i < count; i++) this->insert(pos, value);
 
     return prev == nullptr ? this->begin() : ++prev;
   }
@@ -249,7 +232,6 @@ class List {
                   const const_iterator& last) {
     auto prev = pos;
     --prev;
-
     for (auto it = first; it != last; ++it) this->insert(pos, (*it));
 
     return prev == nullptr ? this->begin() : ++prev;
@@ -299,6 +281,19 @@ class List {
     }
 
     return this->size();
+  }
+  int remove_if(std::function<bool(const T&)> func, const iterator& begin,
+                const iterator& end) {
+    for (auto it = begin; it != end;)
+      if (!func(*it))
+        it = this->remove(it);
+      else
+        ++it;
+
+    return this->size();
+  }
+  int remove_if(std::function<bool(const T&)> func) {
+    return remove_if(func, this->begin(), this->end());
   }
   void resize(const int& count) {
     while (this->size() < count) this->push_back(T());
@@ -410,19 +405,6 @@ class List {
       this->merge(l2, comp);
     }
   }
-  int remove_if(std::function<bool(const T&)> func, const iterator& begin,
-                const iterator& end) {
-    for (auto it = begin; it != end;)
-      if (!func(*it))
-        it = this->remove(it);
-      else
-        ++it;
-
-    return this->size();
-  }
-  int remove_if(std::function<bool(const T&)> func) {
-    return remove_if(func, this->begin(), this->end());
-  }
   void clear() {
     if (!this->empty()) {
       for (auto it = this->begin(); it != this->end();) {
@@ -506,7 +488,6 @@ class List {
   bool none_of(std::function<bool(const T&)> func) const {
     return this->none_of(func, this->begin(), this->end());
   }
-  // for_each
   void for_each(std::function<void(const T&)> func, const const_iterator& begin,
                 const const_iterator& end) const {
     std::for_each(begin, end, func);
@@ -546,7 +527,6 @@ class List {
       previousValue = func(previousValue, *it);
     return previousValue;
   }
-  // Assignment operator
   List<T>& operator=(const std::initializer_list<T>& source) {
     assign(source);
     return *this;
@@ -563,7 +543,6 @@ class List {
     source.reset();
     return *this;
   }
-  // swap
   void swap(List<T>& other) {
     std::swap(this->list_begin, other.list_begin);
     std::swap(this->list_end, other.list_end);
