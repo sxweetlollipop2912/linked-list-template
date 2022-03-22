@@ -200,7 +200,10 @@ class List {
   /// Return iterator pointing to the inserted value
   /// Exception(s): out of range=
   iterator insert_at(const int& index, const T& value) {
-    auto it = this->get_iterator(index);
+    List<T>::iterator it;
+    
+    if (index == this->size()) it = this->end();
+    else it = this->get_iterator(index);
     
     return this->insert(it, value);
   }
@@ -285,7 +288,7 @@ class List {
   int remove_if(std::function<bool(const T&)> func, const iterator& begin,
                 const iterator& end) {
     for (auto it = begin; it != end;)
-      if (!func(*it))
+      if (func(*it))
         it = this->remove(it);
       else
         ++it;
@@ -451,10 +454,10 @@ class List {
   }
   int count(const T& value, const const_iterator& begin,
             const const_iterator& end) const {
-    return std::count(begin, end, value);
+    return (int)std::count(begin, end, value);
   }
   int count(const T& value) const {
-    return this->count(this->begin(), this->end(), value);
+    return this->count(value, this->begin(), this->end());
   }
   /// Exception(s): undefined behavior: null pointer dereference
   int count_if(std::function<bool(const T&)> func, const const_iterator& begin,
