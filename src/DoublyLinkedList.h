@@ -201,7 +201,6 @@ class List {
   /// Exception(s): out of range=
   iterator insert_at(const int& index, const T& value) {
     List<T>::iterator it;
-    
     if (index == this->size()) it = this->end();
     else it = this->get_iterator(index);
     
