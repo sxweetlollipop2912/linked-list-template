@@ -275,16 +275,15 @@ class List {
     return this->remove(it);
   }
   /// Return resulting size.
-  int remove(const T& value) {
-    for (auto it = this->begin(); it != this->end();) {
-      if ((*it) == value)
-        it = this->remove(it);
-      else
-        ++it;
-    }
-
-    return this->size();
+  int remove(const T& value, const iterator& begin,
+             const iterator& end) {
+    return this->remove_if([&](const T& element) { return element == value; }, begin, end);
   }
+  /// Return resulting size.
+  int remove(const T& value) {
+    return this->remove(value, this->begin(), this->end());
+  }
+  /// Return resulting size.
   int remove_if(std::function<bool(const T&)> func, const iterator& begin,
                 const iterator& end) {
     for (auto it = begin; it != end;)
@@ -295,8 +294,9 @@ class List {
 
     return this->size();
   }
+  /// Return resulting size.
   int remove_if(std::function<bool(const T&)> func) {
-    return remove_if(func, this->begin(), this->end());
+    return this->remove_if(func, this->begin(), this->end());
   }
   void resize(const int& count) {
     while (this->size() < count) this->push_back(T());
@@ -518,17 +518,17 @@ class List {
     return res;
   }
   T reduce(std::function<T(const T&, const T&)> func,
-           const T& initialValue) const {
-    T previousValue = initialValue;
-    for (const auto& currentValue : *this)
-      previousValue = func(previousValue, currentValue);
-    return previousValue;
+           const T& initial_value) const {
+    T previous_value = initial_value;
+    for (const auto& current_value : *this)
+      previous_value = func(previous_value, current_value);
+    return previous_value;
   }
   T reduce(std::function<T(const T&, const T&)> func) const {
-    T previousValue = *(this->begin());
+    T previous_value = *(this->begin());
     for (auto it = ++this->begin(); it != this->end(); ++it)
-      previousValue = func(previousValue, *it);
-    return previousValue;
+      previous_value = func(previous_value, *it);
+    return previous_value;
   }
   List<T>& operator=(const std::initializer_list<T>& source) {
     assign(source);
