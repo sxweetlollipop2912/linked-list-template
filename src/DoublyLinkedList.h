@@ -201,9 +201,11 @@ class List {
   /// Exception(s): out of range=
   iterator insert_at(const int& index, const T& value) {
     List<T>::iterator it;
-    if (index == this->size()) it = this->end();
-    else it = this->get_iterator(index);
-    
+    if (index == this->size())
+      it = this->end();
+    else
+      it = this->get_iterator(index);
+
     return this->insert(it, value);
   }
   /// Insert `value` before `pos`.
@@ -274,9 +276,9 @@ class List {
     return this->remove(it);
   }
   /// Return resulting size.
-  int remove(const T& value, const iterator& begin,
-             const iterator& end) {
-    return this->remove_if([&](const T& element) { return element == value; }, begin, end);
+  int remove(const T& value, const iterator& begin, const iterator& end) {
+    return this->remove_if([&](const T& element) { return element == value; },
+                           begin, end);
   }
   /// Return resulting size.
   int remove(const T& value) {
