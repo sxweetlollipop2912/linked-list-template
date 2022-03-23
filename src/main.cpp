@@ -11,7 +11,7 @@ void op(const std::string s, const List<T>& list) {
   std::cout << '\n';
 }
 
-int main(int argc, const char* argv[]) {
+int main() {
   // Comments above each method shows its syntax,
   // explains its function, returning values, notes and cautions,
   // then shows expected output.

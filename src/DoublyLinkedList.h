@@ -47,7 +47,6 @@ private:
   /// Return iterator pointing to the first inserted value, or `pos` if
   /// `first`
   /// == `last`. Exception(s): undefined behavior: null pointer dereference
-  
   iterator move_previous(const iterator& pos, const iterator& first,
                          const iterator& last) {
     list_size += std::distance(first, last);
