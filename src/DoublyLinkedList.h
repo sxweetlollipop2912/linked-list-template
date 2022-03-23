@@ -127,7 +127,7 @@ public:
     
     for (auto it = begin; it != end; ++it) this->push_back(*it);
   }
-  List(List<T>&& source) {
+  List(List<T>&& source) : list_size{0} {
     list_begin = list_end = new Node<T>();
     move_previous(this->end(), source.begin(), source.end());
     source.reset();
@@ -179,11 +179,11 @@ public:
   const T& at(const int& index) const { return (*this)[index]; }
   
   void push_front(const T& value) {
-    Node<T>* new_node = new Node<T>(value);
+    auto* new_node = new Node<T>(value);
     this->insert_previous(this->begin(), iterator(new_node));
   }
   void push_back(const T& value) {
-    Node<T>* new_node = new Node<T>(value);
+    auto* new_node = new Node<T>(value);
     this->insert_previous(this->end(), iterator(new_node));
   }
   /// Exception(s): out of range
@@ -335,10 +335,7 @@ public:
   }
   /// Return resulting size.
   int unique() {
-    auto last = std::unique(this->begin(), this->end());
-    this->resize(std::distance(this->begin(), last));
-
-    return this->size();
+    return this->unique([](const T& u, const T& v) { return u == v; });
   }
   /// Return resulting size.
   int unique(std::function<bool(const T&, const T&)> func) {
